@@ -1,0 +1,2062 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>🛒 POS Supermercado Web - Vallozzi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#020617;
+      --panel:#020617;
+      --panel-soft:#0f172a;
+      --border:#1e293b;
+      --accent:#38bdf8;
+      --accent-soft:#0ea5e9;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --danger:#f97373;
+      --ok:#22c55e;
+      --warn:#facc15;
+      --selection:#1d4ed8;
+    }
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      padding:0;
+      height:100%;
+      width:100%;
+      background:#000;
+      color:var(--text);
+      font-family:"Consolas","Courier New",monospace;
+    }
+    body{
+      display:flex;
+      align-items:stretch;
+      justify-content:stretch;
+    }
+    .crt-wrapper{
+      border:0;
+      box-shadow:none;
+      width:100%;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      background:radial-gradient(circle at 50% 0,rgba(56,189,248,.35),#020617 55%);
+      position:relative;
+      overflow:hidden;
+    }
+    .scanline{
+      pointer-events:none;
+      position:absolute;
+      inset:0;
+      background:linear-gradient(rgba(0,0,0,.15) 50%,rgba(0,0,0,.4) 50%);
+      background-size:100% 3px;
+      mix-blend-mode:soft-light;
+      opacity:.4;
+    }
+    header{
+      background:var(--panel-soft);
+      padding:4px 10px;
+      border-bottom:2px solid var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+    }
+    header .title{
+      font-weight:bold;
+      letter-spacing:2px;
+    }
+    header .status{
+      color:var(--muted);
+      font-size:12px;
+    }
+    .tabs{
+      display:flex;
+      gap:6px;
+      padding:3px 8px;
+      background:#020617;
+      border-bottom:1px solid var(--border);
+      font-size:12px;
+    }
+    .tab{
+      padding:2px 8px;
+      border:1px solid var(--border);
+      border-radius:3px;
+      cursor:default;
+    }
+    .tab.active{
+      background:var(--accent-soft);
+      color:#0f172a;
+      font-weight:bold;
+    }
+
+    main{
+      flex:1;
+      display:grid;
+      grid-template-columns:2.1fr 1fr;
+      gap:4px;
+      padding:6px;
+    }
+    .panel{
+      background:rgba(0,0,0,.65);
+      border:2px solid var(--border);
+      padding:4px;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .panel-title{
+      text-align:center;
+      font-weight:bold;
+      color:var(--accent-soft);
+      border-bottom:1px solid var(--border);
+      padding-bottom:2px;
+      margin-bottom:2px;
+    }
+    .ticket-table{
+      border-collapse:collapse;
+      width:100%;
+      font-size:13px;
+    }
+    .ticket-table thead{
+      background:#0b1120;
+      border-bottom:1px solid var(--border);
+    }
+    .ticket-table th,
+    .ticket-table td{
+      padding:2px 4px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .ticket-table tbody{
+      display:block;
+      max-height:calc(100vh - 210px);
+      overflow-y:auto;
+    }
+    .ticket-table thead tr{
+      display:table;
+      width:100%;
+      table-layout:fixed;
+    }
+    .ticket-table tbody tr{
+      display:table;
+      width:100%;
+      table-layout:fixed;
+    }
+    .ticket-table tbody tr:nth-child(even){
+      background:#020617;
+    }
+    .ticket-table tbody tr:nth-child(odd){
+      background:#030815;
+    }
+    .ticket-table tbody tr.selected{
+      background:var(--selection);
+      color:#e5e7eb;
+    }
+    .ticket-table tbody tr.selected td{
+      font-weight:bold;
+    }
+    .totales{
+      margin-top:4px;
+      border-top:1px solid var(--border);
+      padding-top:4px;
+      font-size:14px;
+    }
+    .tot-row{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:2px;
+    }
+    .tot-row.total{
+      font-weight:bold;
+      color:#bbf7d0;
+      font-size:16px;
+    }
+    .tot-row.label{
+      color:var(--muted);
+    }
+    .code-box{
+      border:1px solid var(--accent-soft);
+      padding:4px;
+      font-size:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:4px;
+    }
+    .code-label{
+      color:var(--muted);
+      margin-right:6px;
+    }
+    .code-value{
+      font-weight:bold;
+      letter-spacing:2px;
+      flex:1;
+    }
+    .code-help{
+      font-size:11px;
+      color:var(--muted);
+    }
+    .help-box{
+      border:1px dashed var(--border);
+      padding:4px;
+      font-size:11px;
+      margin-top:4px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .help-title{
+      color:var(--accent-soft);
+      font-weight:bold;
+      margin-bottom:2px;
+    }
+    .help-row{
+      display:flex;
+      justify-content:space-between;
+    }
+    .foot-help{
+      margin-top:4px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    footer{
+      padding:3px 8px;
+      font-size:11px;
+      border-top:2px solid var(--border);
+      background:#020617;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .msg{
+      color:var(--accent-soft);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:80vw;
+    }
+    .msg.error{color:var(--danger);}
+    .msg.ok{color:var(--ok);}
+    .msg.warn{color:var(--warn);}
+    .kbd{
+      padding:0 3px;
+      border:1px solid var(--border);
+      border-radius:2px;
+      font-size:10px;
+      margin-right:2px;
+    }
+
+    .badge{
+      border:1px solid var(--border);
+      padding:1px 4px;
+      border-radius:2px;
+      font-size:10px;
+      color:var(--muted);
+    }
+
+    .overlay{
+      position:absolute;
+      inset:5%;
+      margin:auto;
+      background:#020617;
+      border:3px solid var(--accent-soft);
+      box-shadow:0 0 25px rgba(56,189,248,.7);
+      padding:8px;
+      display:none;
+      flex-direction:column;
+      z-index:10;
+      min-height:0;
+    }
+    .overlay.active{display:flex;}
+    .overlay-title{
+      text-align:center;
+      font-weight:bold;
+      color:var(--accent);
+      margin-bottom:4px;
+    }
+    .overlay p{
+      margin:2px 0;
+      font-size:12px;
+    }
+    .overlay-section{
+      border:1px solid var(--border);
+      padding:4px;
+      margin-top:4px;
+      min-height:0;
+    }
+
+    .cobro-grid,
+    .productos-grid,
+    .proveedores-grid,
+    .stock-grid,
+    .oc-grid,
+    .entradas-grid{
+      display:grid;
+      grid-template-columns:1.3fr 1fr;
+      gap:6px;
+      margin-top:4px;
+      font-size:12px;
+      min-height:0;
+    }
+
+    .cobro-box{
+      border:1px solid var(--border);
+      padding:4px;
+      font-size:13px;
+    }
+    .cobro-row{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:2px;
+    }
+    .cobro-row.total{
+      font-weight:bold;
+      color:#bbf7d0;
+      font-size:15px;
+    }
+    .cobro-input{
+      border:1px solid var(--accent-soft);
+      background:#020617;
+      color:var(--text);
+      padding:3px 4px;
+      width:100%;
+      font-family:inherit;
+      font-size:14px;
+    }
+
+    table.basic{
+      width:100%;
+      border-collapse:collapse;
+      font-size:11px;
+    }
+    table.basic th,
+    table.basic td{
+      padding:2px 4px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    table.basic thead{background:#0b1120;}
+    table.basic tbody{
+      max-height:45vh;
+      overflow-y:auto;
+      display:block;
+    }
+    table.basic thead tr,
+    table.basic tbody tr{
+      display:table;
+      width:100%;
+      table-layout:fixed;
+    }
+
+    .form-grid{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .form-row{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .form-row label{
+      font-size:11px;
+      color:var(--muted);
+    }
+    .form-input,
+    .form-select,
+    .form-textarea{
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--text);
+      padding:3px 4px;
+      font-family:inherit;
+      font-size:12px;
+    }
+    .form-textarea{
+      resize:vertical;
+      min-height:40px;
+    }
+    .btn{
+      border:1px solid var(--accent-soft);
+      background:#0b1120;
+      color:var(--accent-soft);
+      padding:4px 6px;
+      font-size:12px;
+      cursor:pointer;
+      text-align:center;
+      margin-top:4px;
+    }
+    .btn:active{transform:scale(.98);}
+    .btn-full{width:100%;}
+
+    .rep-table{width:100%;border-collapse:collapse;font-size:11px;}
+    .rep-table th,
+    .rep-table td{
+      padding:2px 4px;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .rep-table thead{background:#0b1120;}
+    .rep-table tbody{
+      max-height:45vh;
+      overflow-y:auto;
+      display:block;
+    }
+    .rep-table thead tr,
+    .rep-table tbody tr{
+      display:table;
+      width:100%;
+      table-layout:fixed;
+    }
+
+    @media (max-width:900px){
+      main{grid-template-columns:1fr;}
+      .overlay{inset:2%;}
+      .cobro-grid,
+      .productos-grid,
+      .proveedores-grid,
+      .stock-grid,
+      .oc-grid,
+      .entradas-grid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="crt-wrapper">
+  <div class="scanline"></div>
+
+  <header>
+    <div class="title">SISTEMA DE CAJA - SUPERMERCADO WEB</div>
+    <div class="status">
+      Caja: <span id="lblCaja">001</span> |
+      Usuario: <span id="lblUsuario">OPERADOR</span> |
+      Módulo: <span id="lblModulo">VENTAS</span> |
+      Estado: <span id="lblEstado">LISTO</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div id="tabVentas" class="tab active">V Ventas</div>
+    <div id="tabProductos" class="tab">P Productos</div>
+    <div id="tabProveedores" class="tab">B Proveedores</div>
+    <div id="tabStock" class="tab">S Stock</div>
+    <div id="tabOC" class="tab">O Órdenes</div>
+    <div id="tabEntradas" class="tab">E Entradas</div>
+    <div id="tabReportes" class="tab">R Reportes</div>
+  </div>
+
+  <main>
+    <!-- PANEL IZQUIERDO: TICKET -->
+    <section class="panel">
+      <div class="panel-title">TICKET ACTUAL</div>
+      <table class="ticket-table">
+        <thead>
+        <tr>
+          <th style="width:60px;">CÓD</th>
+          <th>DESCRIPCIÓN</th>
+          <th style="width:45px;text-align:right;">CANT</th>
+          <th style="width:60px;text-align:right;">P.UNIT</th>
+          <th style="width:70px;text-align:right;">IMPORTE</th>
+        </tr>
+        </thead>
+        <tbody id="tbodyTicket"></tbody>
+      </table>
+      <div class="totales">
+        <div class="tot-row label"><span>Artículos:</span><span id="lblItems">0</span></div>
+        <div class="tot-row"><span>Subtotal:</span><span id="lblSubtotal">0.00</span></div>
+        <div class="tot-row"><span>Descuento:</span><span id="lblDescuento">0.00</span></div>
+        <div class="tot-row total"><span>TOTAL:</span><span id="lblTotal">0.00</span></div>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO: ENTRADA + AYUDA -->
+    <section class="panel">
+      <div class="panel-title">ENTRADA POR TECLADO</div>
+      <div class="code-box">
+        <span class="code-label">CÓDIGO:</span>
+        <span class="code-value" id="lblCodeBuffer">_</span>
+        <span class="code-help">Escribí código + Enter</span>
+      </div>
+      <div style="font-size:12px;margin-bottom:4px;color:var(--muted);">
+        Línea seleccionada: <span id="lblLineaSel">-</span>
+        <span class="badge">Solo teclado (modo ventas)</span>
+      </div>
+      <div class="help-box">
+        <div class="help-title">ATAJOS PRINCIPALES</div>
+        <div class="help-row"><span><span class="kbd">V</span> Ventas</span><span><span class="kbd">P</span> Productos</span></div>
+        <div class="help-row"><span><span class="kbd">B</span> Proveedores</span><span><span class="kbd">S</span> Stock</span></div>
+        <div class="help-row"><span><span class="kbd">O</span> Órdenes compra</span><span><span class="kbd">E</span> Entradas mercadería</span></div>
+        <div class="help-row"><span><span class="kbd">R</span> Reportes</span><span><span class="kbd">Esc</span> Cerrar módulo / cancelar</span></div>
+        <div class="help-row"><span><span class="kbd">Enter</span> Agregar producto</span><span><span class="kbd">↑ / ↓</span> Línea ticket</span></div>
+        <div class="help-row"><span><span class="kbd">+</span>/<span class="kbd">-</span> Cantidad</span><span><span class="kbd">F</span> Cobrar</span></div>
+        <div class="foot-help">
+          Productos, proveedores, stock, OC y entradas guardan todo en Firebase.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div id="lblMensaje" class="msg">Inicializando sistema...</div>
+    <div>
+      <span class="kbd">Ctrl+L</span> Limpiar mensaje
+    </div>
+  </footer>
+
+  <!-- OVERLAY: COBRO -->
+  <div id="overlayCobro" class="overlay">
+    <div class="overlay-title">MEDIOS DE PAGO</div>
+    <div class="cobro-grid">
+      <div class="cobro-box">
+        <div class="cobro-row"><span>Subtotal:</span><span id="lblCobroSubtotal">0.00</span></div>
+        <div class="cobro-row"><span>Descuento:</span><span id="lblCobroDesc">0.00</span></div>
+        <div class="cobro-row total"><span>TOTAL A COBRAR:</span><span id="lblCobroTotal">0.00</span></div>
+        <div class="cobro-row" style="margin-top:6px;">
+          <span>Importe recibido:</span>
+        </div>
+        <input id="txtImporteRecibido" class="cobro-input" type="text" inputmode="decimal" autocomplete="off" />
+        <div class="cobro-row" style="margin-top:4px;">
+          <span>Vuelto:</span><span id="lblCobroVuelto">0.00</span>
+        </div>
+      </div>
+      <div class="cobro-box">
+        <div style="font-weight:bold;margin-bottom:4px;">Medio de pago (teclas 1-4):</div>
+        <div class="cobro-row"><span><span class="kbd">1</span> EFECTIVO</span><span id="mp1" style="color:#bbf7d0;"></span></div>
+        <div class="cobro-row"><span><span class="kbd">2</span> DÉBITO</span><span id="mp2"></span></div>
+        <div class="cobro-row"><span><span class="kbd">3</span> CRÉDITO</span><span id="mp3"></span></div>
+        <div class="cobro-row"><span><span class="kbd">4</span> QR</span><span id="mp4"></span></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--muted);">
+          <span class="kbd">Enter</span> Confirmar cobro |
+          <span class="kbd">Esc</span> Cancelar
+        </div>
+        <div id="lblCobroEstado" style="margin-top:6px;color:var(--accent-soft);font-size:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: PRODUCTOS -->
+  <div id="overlayProductos" class="overlay">
+    <div class="overlay-title">GESTIÓN DE PRODUCTOS (P)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Alta / edición de productos. Si el código existe, se actualiza precio y descripción. Esc para volver a Ventas.
+    </div>
+    <div class="productos-grid">
+      <div class="overlay-section">
+        <div style="font-weight:bold;margin-bottom:4px;">Listado (máx. 300):</div>
+        <table class="basic">
+          <thead>
+          <tr>
+            <th style="width:70px;">CÓD</th>
+            <th>DESCRIPCIÓN</th>
+            <th style="width:70px;text-align:right;">PRECIO</th>
+            <th style="width:55px;text-align:right;">STOCK</th>
+          </tr>
+          </thead>
+          <tbody id="tbodyProductos"></tbody>
+        </table>
+      </div>
+      <div class="overlay-section">
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="txtProdCodigo">Código</label>
+            <input id="txtProdCodigo" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProdDesc">Descripción</label>
+            <input id="txtProdDesc" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProdPrecio">Precio</label>
+            <input id="txtProdPrecio" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProdStock">Stock inicial / ajuste</label>
+            <input id="txtProdStock" class="form-input" autocomplete="off" />
+          </div>
+          <button id="btnProdGuardar" class="btn btn-full">Guardar / Actualizar (Enter)</button>
+          <div id="lblProdEstado" style="font-size:11px;color:var(--accent-soft);min-height:14px;"></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+            Tip: escribí código de uno existente y se cargan sus datos para editar.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: PROVEEDORES -->
+  <div id="overlayProveedores" class="overlay">
+    <div class="overlay-title">PROVEEDORES (B)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Alta / edición / eliminación. Esc para volver a Ventas.
+    </div>
+    <div class="proveedores-grid">
+      <div class="overlay-section">
+        <div style="font-weight:bold;margin-bottom:4px;">Listado (máx. 300):</div>
+        <table class="basic">
+          <thead>
+          <tr>
+            <th style="width:70px;">CÓD</th>
+            <th>RAZÓN SOCIAL</th>
+            <th style="width:120px;">CUIT</th>
+          </tr>
+          </thead>
+          <tbody id="tbodyProveedores"></tbody>
+        </table>
+      </div>
+      <div class="overlay-section">
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="txtProvCodigo">Código proveedor</label>
+            <input id="txtProvCodigo" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProvNombre">Razón social</label>
+            <input id="txtProvNombre" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProvCUIT">CUIT</label>
+            <input id="txtProvCUIT" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label for="txtProvContacto">Contacto / Tel / Mail</label>
+            <textarea id="txtProvContacto" class="form-textarea"></textarea>
+          </div>
+          <button id="btnProvGuardar" class="btn btn-full">Guardar / Actualizar (Enter)</button>
+          <button id="btnProvEliminar" class="btn btn-full" style="border-color:var(--danger);color:var(--danger);">Eliminar proveedor</button>
+          <div id="lblProvEstado" style="font-size:11px;color:var(--accent-soft);min-height:14px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: STOCK -->
+  <div id="overlayStock" class="overlay">
+    <div class="overlay-title">STOCK (S)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Visualización rápida de stock actual por producto. Se alimenta desde productos y entradas de mercadería.
+    </div>
+    <div class="overlay-section stock-grid">
+      <div>
+        <table class="basic">
+          <thead>
+          <tr>
+            <th style="width:70px;">CÓD</th>
+            <th>DESCRIPCIÓN</th>
+            <th style="width:70px;text-align:right;">STOCK</th>
+            <th style="width:70px;text-align:right;">PRECIO</th>
+          </tr>
+          </thead>
+          <tbody id="tbodyStock"></tbody>
+        </table>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);">
+          Esc para salir. Las entradas desde módulo E actualizan automáticamente el stock.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: ÓRDENES DE COMPRA -->
+  <div id="overlayOC" class="overlay">
+    <div class="overlay-title">ÓRDENES DE COMPRA (O)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      OC con varios ítems. Estado: PENDIENTE / RECIBIDA. Esc para volver a Ventas.
+    </div>
+    <div class="oc-grid">
+      <div class="overlay-section">
+        <div style="font-weight:bold;margin-bottom:4px;">Órdenes recientes:</div>
+        <table class="basic">
+          <thead>
+          <tr>
+            <th style="width:80px;">N° OC</th>
+            <th>Proveedor</th>
+            <th style="width:60px;">Estado</th>
+            <th style="width:80px;text-align:right;">Total</th>
+          </tr>
+          </thead>
+          <tbody id="tbodyOC"></tbody>
+        </table>
+      </div>
+      <div class="overlay-section">
+        <div style="font-weight:bold;margin-bottom:4px;">Nueva OC</div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="selOCProv">Proveedor</label>
+            <select id="selOCProv" class="form-select"></select>
+          </div>
+          <div class="form-row">
+            <label>Ítems (agregar uno por vez)</label>
+          </div>
+          <div class="form-row">
+            <label>Código prod</label>
+            <input id="txtOCCod" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label>Cantidad</label>
+            <input id="txtOCCant" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-row">
+            <label>Precio unidad</label>
+            <input id="txtOCPrecio" class="form-input" autocomplete="off" />
+          </div>
+          <button id="btnOCAddItem" class="btn btn-full">Agregar ítem</button>
+          <div class="overlay-section" style="margin-top:4px;">
+            <div style="font-weight:bold;margin-bottom:2px;">Ítems en OC:</div>
+            <table class="basic">
+              <thead>
+              <tr>
+                <th style="width:70px;">CÓD</th>
+                <th>DESC</th>
+                <th style="width:60px;text-align:right;">CANT</th>
+                <th style="width:60px;text-align:right;">P.U.</th>
+              </tr>
+              </thead>
+              <tbody id="tbodyOCItems"></tbody>
+            </table>
+          </div>
+          <button id="btnOCGuardar" class="btn btn-full">Guardar OC</button>
+          <div id="lblOCEstado" style="font-size:11px;color:var(--accent-soft);min-height:14px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: ENTRADAS DE MERCADERÍA -->
+  <div id="overlayEntradas" class="overlay">
+    <div class="overlay-title">ENTRADAS DE MERCADERÍA (E)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Registrar ingresos desde OC o manuales. Actualiza stock de productos.
+    </div>
+    <div class="entradas-grid">
+      <div class="overlay-section">
+        <div style="font-weight:bold;margin-bottom:4px;">Entradas recientes:</div>
+        <table class="basic">
+          <thead>
+          <tr>
+            <th style="width:80px;">Fecha</th>
+            <th>Origen</th>
+            <th style="width:80px;text-align:right;">Total items</th>
+          </tr>
+          </thead>
+          <tbody id="tbodyEntradas"></tbody>
+        </table>
+      </div>
+      <div class="overlay-section">
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Tipo de entrada</label>
+            <select id="selTipoEntrada" class="form-select">
+              <option value="OC">Desde Orden de compra</option>
+              <option value="MANUAL">Manual</option>
+            </select>
+          </div>
+
+          <div id="bloqueEntradaOC">
+            <div class="form-row" style="margin-top:4px;">
+              <label>Seleccionar OC pendiente</label>
+              <select id="selEntradaOC" class="form-select"></select>
+            </div>
+            <div class="overlay-section" style="margin-top:4px;">
+              <div style="font-weight:bold;margin-bottom:2px;">Ítems de la OC:</div>
+              <table class="basic">
+                <thead>
+                <tr>
+                  <th style="width:70px;">CÓD</th>
+                  <th>DESC</th>
+                  <th style="width:60px;text-align:right;">CANT</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyEntradaOCItems"></tbody>
+              </table>
+            </div>
+            <button id="btnConfirmarEntradaOC" class="btn btn-full">Confirmar entrada por OC (cantidades completas)</button>
+          </div>
+
+          <div id="bloqueEntradaManual" style="display:none;">
+            <div class="form-row" style="margin-top:4px;">
+              <label>Proveedor (opcional)</label>
+              <select id="selEntradaProv" class="form-select"></select>
+            </div>
+            <div class="form-row">
+              <label>Código producto</label>
+              <input id="txtEntCod" class="form-input" autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <label>Cantidad</label>
+              <input id="txtEntCant" class="form-input" autocomplete="off" />
+            </div>
+            <button id="btnAgregarEntradaManual" class="btn btn-full">Registrar entrada manual</button>
+          </div>
+
+          <div id="lblEntradaEstado" style="font-size:11px;color:var(--accent-soft);min-height:14px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY: REPORTES -->
+  <div id="overlayReportes" class="overlay">
+    <div class="overlay-title">REPORTES DEL DÍA (R)</div>
+    <div style="font-size:12px;color:var(--muted);">
+      Ventas del día actual agrupadas por medio de pago.
+    </div>
+    <div class="overlay-section" style="margin-top:6px;">
+      <div id="lblRepResumen" style="font-size:12px;margin-bottom:4px;"></div>
+      <table class="rep-table">
+        <thead>
+        <tr>
+          <th style="width:100px;">HORA</th>
+          <th style="width:90px;">MEDIO</th>
+          <th style="width:80px;text-align:right;">TOTAL</th>
+          <th style="text-align:left;">DETALLE</th>
+        </tr>
+        </thead>
+        <tbody id="tbodyReportes"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPT PRINCIPAL -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    limit,
+    serverTimestamp,
+    doc,
+    updateDoc,
+    deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyClDJTfD7tMClhUH9unWW_x93FYAIDcM2I",
+    authDomain: "finanzas-4-0.firebaseapp.com",
+    projectId: "finanzas-4-0",
+    storageBucket: "finanzas-4-0.firebasestorage.app",
+    messagingSenderId: "740934543720",
+    appId: "1:740934543720:web:b51c2d488c048a6b0fcedd"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ===== ESTADO GENERAL =====
+  let productos = [];   // {id,codigo,descripcion,precio,stock}
+  let proveedores = []; // {id,codigo,nombre,cuit,contacto}
+  let ordenes = [];     // {id,numero,proveedorId,proveedorNombre,items,estado,total}
+  let entradas = [];    // {id,tipo,origen,items,fecha}
+  let ticketItems = [];
+  let selectedIndex = -1;
+  let codeBuffer = "";
+  let modoCobro = false;
+  let modoProductos = false;
+  let modoProveedores = false;
+  let modoStock = false;
+  let modoOC = false;
+  let modoEntradas = false;
+  let modoReportes = false;
+  let medioSeleccionado = "EFECTIVO";
+  let ocItemsTemp = [];
+
+  // numeración de tickets (local)
+  let ticketSeq = Number(localStorage.getItem("ticketSeq") || 0);
+  function generarNroTicket() {
+    ticketSeq++;
+    localStorage.setItem("ticketSeq", ticketSeq);
+    return "T-" + ticketSeq.toString().padStart(6, "0");
+  }
+
+  // ===== REF DOM =====
+  const tbodyTicket = document.getElementById("tbodyTicket");
+  const lblItems = document.getElementById("lblItems");
+  const lblSubtotal = document.getElementById("lblSubtotal");
+  const lblDescuento = document.getElementById("lblDescuento");
+  const lblTotal = document.getElementById("lblTotal");
+  const lblMensaje = document.getElementById("lblMensaje");
+  const lblCodeBuffer = document.getElementById("lblCodeBuffer");
+  const lblLineaSel = document.getElementById("lblLineaSel");
+  const lblEstado = document.getElementById("lblEstado");
+  const lblModulo = document.getElementById("lblModulo");
+
+  const tabVentas = document.getElementById("tabVentas");
+  const tabProductos = document.getElementById("tabProductos");
+  const tabProveedores = document.getElementById("tabProveedores");
+  const tabStock = document.getElementById("tabStock");
+  const tabOC = document.getElementById("tabOC");
+  const tabEntradas = document.getElementById("tabEntradas");
+  const tabReportes = document.getElementById("tabReportes");
+
+  const overlayCobro = document.getElementById("overlayCobro");
+  const lblCobroSubtotal = document.getElementById("lblCobroSubtotal");
+  const lblCobroDesc = document.getElementById("lblCobroDesc");
+  const lblCobroTotal = document.getElementById("lblCobroTotal");
+  const lblCobroVuelto = document.getElementById("lblCobroVuelto");
+  const lblCobroEstado = document.getElementById("lblCobroEstado");
+  const txtImporteRecibido = document.getElementById("txtImporteRecibido");
+  const mp1 = document.getElementById("mp1");
+  const mp2 = document.getElementById("mp2");
+  const mp3 = document.getElementById("mp3");
+  const mp4 = document.getElementById("mp4");
+
+  const overlayProductos = document.getElementById("overlayProductos");
+  const tbodyProductos = document.getElementById("tbodyProductos");
+  const txtProdCodigo = document.getElementById("txtProdCodigo");
+  const txtProdDesc = document.getElementById("txtProdDesc");
+  const txtProdPrecio = document.getElementById("txtProdPrecio");
+  const txtProdStock = document.getElementById("txtProdStock");
+  const btnProdGuardar = document.getElementById("btnProdGuardar");
+  const lblProdEstado = document.getElementById("lblProdEstado");
+
+  const overlayProveedores = document.getElementById("overlayProveedores");
+  const tbodyProveedores = document.getElementById("tbodyProveedores");
+  const txtProvCodigo = document.getElementById("txtProvCodigo");
+  const txtProvNombre = document.getElementById("txtProvNombre");
+  const txtProvCUIT = document.getElementById("txtProvCUIT");
+  const txtProvContacto = document.getElementById("txtProvContacto");
+  const btnProvGuardar = document.getElementById("btnProvGuardar");
+  const btnProvEliminar = document.getElementById("btnProvEliminar");
+  const lblProvEstado = document.getElementById("lblProvEstado");
+
+  const overlayStock = document.getElementById("overlayStock");
+  const tbodyStock = document.getElementById("tbodyStock");
+
+  const overlayOC = document.getElementById("overlayOC");
+  const tbodyOC = document.getElementById("tbodyOC");
+  const selOCProv = document.getElementById("selOCProv");
+  const txtOCCod = document.getElementById("txtOCCod");
+  const txtOCCant = document.getElementById("txtOCCant");
+  const txtOCPrecio = document.getElementById("txtOCPrecio");
+  const btnOCAddItem = document.getElementById("btnOCAddItem");
+  const tbodyOCItems = document.getElementById("tbodyOCItems");
+  const btnOCGuardar = document.getElementById("btnOCGuardar");
+  const lblOCEstado = document.getElementById("lblOCEstado");
+
+  const overlayEntradas = document.getElementById("overlayEntradas");
+  const tbodyEntradas = document.getElementById("tbodyEntradas");
+  const selTipoEntrada = document.getElementById("selTipoEntrada");
+  const bloqueEntradaOC = document.getElementById("bloqueEntradaOC");
+  const bloqueEntradaManual = document.getElementById("bloqueEntradaManual");
+  const selEntradaOC = document.getElementById("selEntradaOC");
+  const tbodyEntradaOCItems = document.getElementById("tbodyEntradaOCItems");
+  const btnConfirmarEntradaOC = document.getElementById("btnConfirmarEntradaOC");
+  const selEntradaProv = document.getElementById("selEntradaProv");
+  const txtEntCod = document.getElementById("txtEntCod");
+  const txtEntCant = document.getElementById("txtEntCant");
+  const btnAgregarEntradaManual = document.getElementById("btnAgregarEntradaManual");
+  const lblEntradaEstado = document.getElementById("lblEntradaEstado");
+
+  const overlayReportes = document.getElementById("overlayReportes");
+  const tbodyReportes = document.getElementById("tbodyReportes");
+  const lblRepResumen = document.getElementById("lblRepResumen");
+
+  // ==== utils ====
+  function formatearMoneda(v){
+    if(isNaN(v)) v = 0;
+    return v.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  function floatFromText(t){
+    return parseFloat(String(t).replace(/\./g,"").replace(",","."));
+  }
+  function mostrarMensaje(texto,tipo="info"){
+    lblMensaje.textContent = texto;
+    lblMensaje.className = "msg";
+    if(tipo==="error") lblMensaje.classList.add("error");
+    if(tipo==="ok") lblMensaje.classList.add("ok");
+    if(tipo==="warn") lblMensaje.classList.add("warn");
+  }
+  function actualizarCodeBuffer(){
+    lblCodeBuffer.textContent = codeBuffer==="" ? "_" : codeBuffer;
+  }
+  function recalcularTotales(){
+    let subtotal = 0;
+    let items = 0;
+    ticketItems.forEach(it=>{
+      subtotal += it.precio*it.cantidad;
+      items += it.cantidad;
+    });
+    const descuento = 0;
+    const total = subtotal-descuento;
+    lblItems.textContent = items;
+    lblSubtotal.textContent = formatearMoneda(subtotal);
+    lblDescuento.textContent = formatearMoneda(descuento);
+    lblTotal.textContent = formatearMoneda(total);
+  }
+  function renderTicket(){
+    tbodyTicket.innerHTML="";
+    ticketItems.forEach((it,idx)=>{
+      const tr=document.createElement("tr");
+      if(idx===selectedIndex) tr.classList.add("selected");
+      const tdCod=document.createElement("td");
+      const tdDesc=document.createElement("td");
+      const tdCant=document.createElement("td");
+      const tdPrecio=document.createElement("td");
+      const tdImporte=document.createElement("td");
+      tdCod.textContent=it.codigo;
+      tdDesc.textContent=it.descripcion;
+      tdCant.textContent=it.cantidad;
+      tdCant.style.textAlign="right";
+      tdPrecio.textContent=formatearMoneda(it.precio);
+      tdPrecio.style.textAlign="right";
+      tdImporte.textContent=formatearMoneda(it.precio*it.cantidad);
+      tdImporte.style.textAlign="right";
+      tr.append(tdCod,tdDesc,tdCant,tdPrecio,tdImporte);
+      tbodyTicket.appendChild(tr);
+    });
+    if(selectedIndex<0 && ticketItems.length>0) selectedIndex=0;
+    if(selectedIndex>=ticketItems.length) selectedIndex=ticketItems.length-1;
+    lblLineaSel.textContent=selectedIndex>=0?(selectedIndex+1):"-";
+    recalcularTotales();
+  }
+
+  // ===== productos =====
+  async function cargarProductos(){
+    const q=query(collection(db,"productos"),orderBy("codigo"),limit(300));
+    const snap=await getDocs(q);
+    productos=[];
+    snap.forEach(d=>{
+      const v=d.data();
+      productos.push({
+        id:d.id,
+        codigo:v.codigo,
+        descripcion:v.descripcion,
+        precio:Number(v.precio)||0,
+        stock:Number(v.stock)||0
+      });
+    });
+    if(productos.length===0){
+      const base=[
+        {codigo:"1001",descripcion:"PAN LACTAL BLANCO",precio:1500,stock:20},
+        {codigo:"1002",descripcion:"LECHE ENTERA 1L",precio:900,stock:30},
+        {codigo:"1003",descripcion:"YERBA MATE 1KG",precio:3800,stock:15},
+        {codigo:"2001",descripcion:"GASEOSA COLA 1.5L",precio:2100,stock:10}
+      ];
+      for(const p of base){
+        const ref=await addDoc(collection(db,"productos"),p);
+        productos.push({...p,id:ref.id});
+      }
+    }
+    renderTablaProductos();
+    renderStock();
+  }
+  function renderTablaProductos(){
+    tbodyProductos.innerHTML="";
+    productos.forEach(p=>{
+      const tr=document.createElement("tr");
+      tr.dataset.codigo=p.codigo;
+      const tdCod=document.createElement("td");
+      const tdDesc=document.createElement("td");
+      const tdPrecio=document.createElement("td");
+      const tdStock=document.createElement("td");
+      tdCod.textContent=p.codigo;
+      tdDesc.textContent=p.descripcion;
+      tdPrecio.textContent=formatearMoneda(p.precio);
+      tdPrecio.style.textAlign="right";
+      tdStock.textContent=p.stock;
+      tdStock.style.textAlign="right";
+      tr.append(tdCod,tdDesc,tdPrecio,tdStock);
+      tr.addEventListener("click",()=>cargarProductoEnFormulario(p.codigo));
+      tbodyProductos.appendChild(tr);
+    });
+  }
+  function renderStock(){
+    tbodyStock.innerHTML="";
+    productos.forEach(p=>{
+      const tr=document.createElement("tr");
+      const tdCod=document.createElement("td");
+      const tdDesc=document.createElement("td");
+      const tdStock=document.createElement("td");
+      const tdPrecio=document.createElement("td");
+      tdCod.textContent=p.codigo;
+      tdDesc.textContent=p.descripcion;
+      tdStock.textContent=p.stock;
+      tdStock.style.textAlign="right";
+      tdPrecio.textContent=formatearMoneda(p.precio);
+      tdPrecio.style.textAlign="right";
+      tr.append(tdCod,tdDesc,tdStock,tdPrecio);
+      tbodyStock.appendChild(tr);
+    });
+  }
+  function buscarProducto(codigo){
+    return productos.find(p=>p.codigo===codigo);
+  }
+  function cargarProductoEnFormulario(codigo){
+    const p=buscarProducto(codigo);
+    if(!p) return;
+    txtProdCodigo.value=p.codigo;
+    txtProdDesc.value=p.descripcion;
+    txtProdPrecio.value=p.precio;
+    txtProdStock.value=p.stock;
+    lblProdEstado.textContent="Producto cargado para edición.";
+    txtProdDesc.focus();
+  }
+  async function guardarProducto(){
+    const codigo=txtProdCodigo.value.trim();
+    const desc=txtProdDesc.value.trim();
+    const precioNum=Number(txtProdPrecio.value.replace(",","."));
+    const stockNum=Number(txtProdStock.value.replace(",",".")||0);
+    if(!codigo || !desc || isNaN(precioNum) || precioNum<=0){
+      lblProdEstado.textContent="Completá código, descripción y precio válido.";
+      return;
+    }
+    let existente=productos.find(p=>p.codigo===codigo);
+    try{
+      if(existente){
+        const ref=doc(db,"productos",existente.id);
+        await updateDoc(ref,{descripcion:desc,precio:precioNum,stock:stockNum});
+        existente.descripcion=desc;
+        existente.precio=precioNum;
+        existente.stock=stockNum;
+        lblProdEstado.textContent="Producto actualizado ✔";
+      }else{
+        const ref=await addDoc(collection(db,"productos"),{
+          codigo,
+          descripcion:desc,
+          precio:precioNum,
+          stock:stockNum
+        });
+        productos.push({id:ref.id,codigo,descripcion:desc,precio:precioNum,stock:stockNum});
+        lblProdEstado.textContent="Producto creado ✔";
+      }
+      renderTablaProductos();
+      renderStock();
+    }catch(err){
+      lblProdEstado.textContent="Error: "+err.message;
+    }
+  }
+
+  // ===== proveedores =====
+  async function cargarProveedores(){
+    const q=query(collection(db,"proveedores"),orderBy("codigo"),limit(300));
+    const snap=await getDocs(q);
+    proveedores=[];
+    snap.forEach(d=>{
+      const v=d.data();
+      proveedores.push({
+        id:d.id,
+        codigo:v.codigo,
+        nombre:v.nombre,
+        cuit:v.cuit||"",
+        contacto:v.contacto||""
+      });
+    });
+    renderTablaProveedores();
+    poblarSelectProveedores();
+  }
+  function renderTablaProveedores(){
+    tbodyProveedores.innerHTML="";
+    proveedores.forEach(p=>{
+      const tr=document.createElement("tr");
+      tr.dataset.codigo=p.codigo;
+      const tdCod=document.createElement("td");
+      const tdNom=document.createElement("td");
+      const tdCuit=document.createElement("td");
+      tdCod.textContent=p.codigo;
+      tdNom.textContent=p.nombre;
+      tdCuit.textContent=p.cuit;
+      tr.append(tdCod,tdNom,tdCuit);
+      tr.addEventListener("click",()=>cargarProveedorEnForm(p.codigo));
+      tbodyProveedores.appendChild(tr);
+    });
+  }
+  function cargarProveedorEnForm(codigo){
+    const p=proveedores.find(x=>x.codigo===codigo);
+    if(!p) return;
+    txtProvCodigo.value=p.codigo;
+    txtProvNombre.value=p.nombre;
+    txtProvCUIT.value=p.cuit;
+    txtProvContacto.value=p.contacto;
+    lblProvEstado.textContent="Proveedor cargado para edición.";
+  }
+  async function guardarProveedor(){
+    const codigo=txtProvCodigo.value.trim();
+    const nombre=txtProvNombre.value.trim();
+    const cuit=txtProvCUIT.value.trim();
+    const contacto=txtProvContacto.value.trim();
+    if(!codigo || !nombre){
+      lblProvEstado.textContent="Código y razón social son obligatorios.";
+      return;
+    }
+    let existente=proveedores.find(p=>p.codigo===codigo);
+    try{
+      if(existente){
+        await updateDoc(doc(db,"proveedores",existente.id),{codigo,nombre,cuit,contacto});
+        existente.codigo=codigo;
+        existente.nombre=nombre;
+        existente.cuit=cuit;
+        existente.contacto=contacto;
+        lblProvEstado.textContent="Proveedor actualizado ✔";
+      }else{
+        const ref=await addDoc(collection(db,"proveedores"),{codigo,nombre,cuit,contacto});
+        proveedores.push({id:ref.id,codigo,nombre,cuit,contacto});
+        lblProvEstado.textContent="Proveedor creado ✔";
+      }
+      renderTablaProveedores();
+      poblarSelectProveedores();
+    }catch(err){
+      lblProvEstado.textContent="Error: "+err.message;
+    }
+  }
+  async function eliminarProveedor(){
+    const codigo=txtProvCodigo.value.trim();
+    if(!codigo){lblProvEstado.textContent="Primero carga un proveedor.";return;}
+    const p=proveedores.find(x=>x.codigo===codigo);
+    if(!p){lblProvEstado.textContent="Proveedor no encontrado.";return;}
+    try{
+      await deleteDoc(doc(db,"proveedores",p.id));
+      proveedores=proveedores.filter(x=>x.id!==p.id);
+      renderTablaProveedores();
+      poblarSelectProveedores();
+      txtProvCodigo.value="";
+      txtProvNombre.value="";
+      txtProvCUIT.value="";
+      txtProvContacto.value="";
+      lblProvEstado.textContent="Proveedor eliminado ✔";
+    }catch(err){
+      lblProvEstado.textContent="Error: "+err.message;
+    }
+  }
+  function poblarSelectProveedores(){
+    const combos=[selOCProv,selEntradaProv];
+    combos.forEach(sel=>{
+      sel.innerHTML="";
+      const opt=document.createElement("option");
+      opt.value="";
+      opt.textContent="(Seleccionar)";
+      sel.appendChild(opt);
+      proveedores.forEach(p=>{
+        const o=document.createElement("option");
+        o.value=p.id;
+        o.textContent=p.codigo+" - "+p.nombre;
+        sel.appendChild(o);
+      });
+    });
+  }
+
+  // ===== stock modifications =====
+  async function ajustarStockProducto(codigo,cantidad){
+    const p=buscarProducto(codigo);
+    if(!p) return;
+    p.stock=(Number(p.stock)||0)+cantidad;
+    if(p.stock<0)p.stock=0;
+    await updateDoc(doc(db,"productos",p.id),{stock:p.stock});
+  }
+
+  // helper: cantidad ya cargada de un código en el ticket
+  function cantidadEnTicket(codigo){
+    const it = ticketItems.find(x=>x.codigo===codigo);
+    return it ? it.cantidad : 0;
+  }
+
+  // ===== ventas / cobro =====
+  function agregarProductoPorCodigo(codigo){
+    const prod=buscarProducto(codigo);
+    if(!prod){
+      mostrarMensaje(`Código ${codigo} no encontrado. Cargalo en P.`, "error");
+      return;
+    }
+
+    const enTicket = cantidadEnTicket(codigo);
+    const disponible = Number(prod.stock) || 0;
+
+    if(disponible <= 0){
+      mostrarMensaje(`Sin stock de ${prod.descripcion} (0 uds).`, "error");
+      return;
+    }
+    if(enTicket + 1 > disponible){
+      mostrarMensaje(`Stock insuficiente de ${prod.descripcion}. Disponible: ${disponible}, en ticket: ${enTicket}.`, "error");
+      return;
+    }
+
+    const idx=ticketItems.findIndex(it=>it.codigo===codigo);
+    if(idx>=0){
+      ticketItems[idx].cantidad++;
+      selectedIndex=idx;
+    }else{
+      ticketItems.push({
+        codigo:prod.codigo,
+        descripcion:prod.descripcion,
+        precio:prod.precio,
+        cantidad:1
+      });
+      selectedIndex=ticketItems.length-1;
+    }
+    renderTicket();
+    mostrarMensaje(`Agregado: ${prod.descripcion}`);
+  }
+
+  function ajustarCantidad(delta){
+    if(selectedIndex<0||selectedIndex>=ticketItems.length)return;
+    const item = ticketItems[selectedIndex];
+    if(!item) return;
+
+    if(delta>0){
+      const prod = buscarProducto(item.codigo);
+      if(!prod) return;
+      const disponible = Number(prod.stock)||0;
+      const enTicket = item.cantidad;
+      if(enTicket + 1 > disponible){
+        mostrarMensaje(`Stock insuficiente. Disponible: ${disponible}, en ticket: ${enTicket}.`, "error");
+        return;
+      }
+    }
+
+    item.cantidad+=delta;
+    if(item.cantidad<=0){
+      ticketItems.splice(selectedIndex,1);
+      if(ticketItems.length===0)selectedIndex=-1;
+    }
+    renderTicket();
+  }
+
+  function eliminarLinea(){
+    if(selectedIndex<0||selectedIndex>=ticketItems.length)return;
+    ticketItems.splice(selectedIndex,1);
+    if(ticketItems.length===0)selectedIndex=-1;
+    renderTicket();
+  }
+  function nuevoTicket(){
+    ticketItems=[];
+    selectedIndex=-1;
+    codeBuffer="";
+    actualizarCodeBuffer();
+    renderTicket();
+    mostrarMensaje("Nuevo ticket listo.");
+  }
+
+  function marcarMedio(mp){
+    medioSeleccionado=mp;
+    mp1.textContent=mp==="EFECTIVO"?"<--":"";
+    mp2.textContent=mp==="DEBITO"?"<--":"";
+    mp3.textContent=mp==="CREDITO"?"<--":"";
+    mp4.textContent=mp==="QR"?"<--":"";
+  }
+  function abrirCobro(){
+    if(ticketItems.length===0){
+      mostrarMensaje("No hay ítems en el ticket.","warn");
+      return;
+    }
+    // chequeo final de stock antes de ir a cobro
+    for(const it of ticketItems){
+      const prod = buscarProducto(it.codigo);
+      const stockDisp = prod ? (Number(prod.stock)||0) : 0;
+      if(it.cantidad > stockDisp){
+        mostrarMensaje(`Cantidad de ${it.descripcion} supera stock (${it.cantidad} vs ${stockDisp}). Ajustá el ticket.`, "error");
+        return;
+      }
+    }
+
+    modoCobro=true;
+    lblEstado.textContent="MODO COBRO";
+    overlayCobro.classList.add("active");
+    const subtotal=floatFromText(lblSubtotal.textContent)||0;
+    const desc=0;
+    const total=floatFromText(lblTotal.textContent)||0;
+    lblCobroSubtotal.textContent=formatearMoneda(subtotal);
+    lblCobroDesc.textContent=formatearMoneda(desc);
+    lblCobroTotal.textContent=formatearMoneda(total);
+    txtImporteRecibido.value="";
+    lblCobroVuelto.textContent="0.00";
+    marcarMedio("EFECTIVO");
+    lblCobroEstado.textContent="";
+    txtImporteRecibido.focus();
+  }
+  function cerrarCobro(){
+    modoCobro=false;
+    overlayCobro.classList.remove("active");
+    lblCobroEstado.textContent="";
+    lblEstado.textContent="LISTO";
+  }
+  function recalcularVuelto(){
+    const total=floatFromText(lblCobroTotal.textContent)||0;
+    const recibido=parseFloat(txtImporteRecibido.value.replace(",","."))||0;
+    const vuelto=recibido-total;
+    lblCobroVuelto.textContent=formatearMoneda(vuelto>0?vuelto:0);
+  }
+
+  // ==== IMPRESIÓN DE TICKET ====
+  function imprimirTicket(venta){
+    const win = window.open("", "_blank", "width=320,height=600");
+    if(!win){
+      alert("Habilitá los pop-ups para imprimir el ticket.");
+      return;
+    }
+    const fecha = venta.fecha || new Date();
+    const dd = String(fecha.getDate()).padStart(2,"0");
+    const mm = String(fecha.getMonth()+1).padStart(2,"0");
+    const yyyy = fecha.getFullYear();
+    const hh = String(fecha.getHours()).padStart(2,"0");
+    const mi = String(fecha.getMinutes()).padStart(2,"0");
+
+    let lineas = [];
+    lineas.push("   SUPERMERCADO WEB");
+    lineas.push("    TICKET SIMPLIFICADO");
+    lineas.push("--------------------------------");
+    lineas.push("Caja: 001   Tkt: " + (venta.nroTicket || "-"));
+    lineas.push("Fecha: "+dd+"/"+mm+"/"+yyyy+"  "+hh+":"+mi);
+    lineas.push("--------------------------------");
+    lineas.push("CANT  DESCRIPCIÓN         IMPORTE");
+    lineas.push("--------------------------------");
+
+    (venta.items || []).forEach(it=>{
+      const cant = String(it.cantidad).padStart(3," ");
+      const desc = String(it.descripcion || "").substring(0,18).padEnd(18," ");
+      const imp  = formatearMoneda(it.precio*it.cantidad).padStart(8," ");
+      lineas.push(`${cant}  ${desc}${imp}`);
+    });
+
+    lineas.push("--------------------------------");
+    lineas.push("SUBTOTAL:    $ "+formatearMoneda(venta.subtotal || 0));
+    lineas.push("DESC.:       $ "+formatearMoneda(venta.descuento || 0));
+    lineas.push("TOTAL:       $ "+formatearMoneda(venta.total || 0));
+    lineas.push("--------------------------------");
+    lineas.push("Medio: "+(venta.medioPago || "-"));
+    if(venta.importeRecibido){
+      lineas.push("Pagó:        $ "+formatearMoneda(venta.importeRecibido));
+      const vuelto = (venta.importeRecibido || 0) - (venta.total || 0);
+      lineas.push("Vuelto:      $ "+formatearMoneda(vuelto>0?vuelto:0));
+    }
+    lineas.push("--------------------------------");
+    lineas.push("   ¡GRACIAS POR SU COMPRA!");
+    lineas.push("      Vuelva pronto :)");
+    lineas.push("\n\n\n");
+
+    const html = `
+      <html>
+      <head>
+        <title>Ticket</title>
+        <style>
+          @media print {
+            body { margin:0; }
+          }
+          body{
+            font-family: "Consolas","Courier New",monospace;
+            font-size:12px;
+            padding:4px;
+          }
+          pre{
+            margin:0;
+            white-space:pre;
+          }
+        </style>
+      </head>
+      <body>
+        <pre>${lineas.join("\n")}</pre>
+        <script>
+          window.onload = function(){
+            window.print();
+            setTimeout(function(){ window.close(); }, 500);
+          };
+        <\/script>
+      </body>
+      </html>
+    `;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  }
+
+  async function confirmarCobro(){
+    const subtotal=floatFromText(lblCobroSubtotal.textContent)||0;
+    const total=floatFromText(lblCobroTotal.textContent)||0;
+    const recibido=parseFloat(txtImporteRecibido.value.replace(",","."))||0;
+    if(recibido<total && medioSeleccionado==="EFECTIVO"){
+      lblCobroEstado.textContent="Importe recibido menor al total.";
+      return;
+    }
+
+    // chequeo final de stock antes de grabar venta
+    for(const it of ticketItems){
+      const prod = buscarProducto(it.codigo);
+      const stockDisp = prod ? (Number(prod.stock)||0) : 0;
+      if(it.cantidad > stockDisp){
+        lblCobroEstado.textContent = `Stock insuficiente para ${it.descripcion}: ticket=${it.cantidad}, stock=${stockDisp}`;
+        mostrarMensaje(`No se puede cobrar: ${it.descripcion} supera el stock.`, "error");
+        return;
+      }
+    }
+
+    const nroTicket = generarNroTicket();
+    const fechaLocal = new Date();
+    try{
+      const venta={
+        nroTicket,
+        items:ticketItems.map(it=>({
+          codigo:it.codigo,
+          descripcion:it.descripcion,
+          precio:it.precio,
+          cantidad:it.cantidad
+        })),
+        subtotal,
+        descuento:0,
+        total,
+        medioPago:medioSeleccionado,
+        importeRecibido:recibido,
+        creadoEn:serverTimestamp()
+      };
+      lblCobroEstado.textContent="Guardando venta...";
+      const ventaRef = await addDoc(collection(db,"ventas"),venta);
+      void ventaRef;
+
+      // DESCONTAR STOCK POR VENTA
+      for(const it of venta.items){
+        await ajustarStockProducto(it.codigo, -it.cantidad);
+      }
+      renderStock();
+
+      lblCobroEstado.textContent="Venta guardada ✔";
+      mostrarMensaje(`Venta guardada (${medioSeleccionado}).`,"ok");
+
+      imprimirTicket({...venta, fecha: fechaLocal});
+
+      setTimeout(()=>{
+        cerrarCobro();
+        nuevoTicket();
+      },600);
+    }catch(err){
+      lblCobroEstado.textContent="Error: "+err.message;
+      mostrarMensaje("Error al guardar venta: "+err.message,"error");
+    }
+  }
+
+  // ===== reportes =====
+  function esMismoDia(fecha,hoy){
+    return fecha.getFullYear()===hoy.getFullYear() &&
+           fecha.getMonth()===hoy.getMonth() &&
+           fecha.getDate()===hoy.getDate();
+  }
+  async function cargarReportesHoy(){
+    tbodyReportes.innerHTML="";
+    lblRepResumen.textContent="Cargando ventas...";
+    const q=query(collection(db,"ventas"),orderBy("creadoEn","desc"),limit(300));
+    const snap=await getDocs(q);
+    const hoy=new Date();
+    const ventas=[];
+    snap.forEach(d=>{
+      const v=d.data();
+      if(v.creadoEn && v.creadoEn.toDate){
+        const f=v.creadoEn.toDate();
+        if(esMismoDia(f,hoy)){
+          ventas.push({...v,fecha:f});
+        }
+      }
+    });
+    let totalDia=0;
+    const porMedio={};
+    ventas.forEach(v=>{
+      const t=Number(v.total)||0;
+      totalDia+=t;
+      const mp=v.medioPago||"SIN";
+      porMedio[mp]=(porMedio[mp]||0)+t;
+    });
+    lblRepResumen.innerHTML=
+      `Ventas: <strong>${ventas.length}</strong> | Total: <strong>$ ${formatearMoneda(totalDia)}</strong> `+
+      `| EFECTIVO: $ ${formatearMoneda(porMedio["EFECTIVO"]||0)} | DÉBITO: $ ${formatearMoneda(porMedio["DEBITO"]||0)} `+
+      `| CRÉDITO: $ ${formatearMoneda(porMedio["CREDITO"]||0)} | QR: $ ${formatearMoneda(porMedio["QR"]||0)}`;
+    ventas.forEach(v=>{
+      const tr=document.createElement("tr");
+      const tdHora=document.createElement("td");
+      const tdMedio=document.createElement("td");
+      const tdTotal=document.createElement("td");
+      const tdDet=document.createElement("td");
+      if(v.fecha){
+        const hh=String(v.fecha.getHours()).padStart(2,"0");
+        const mm=String(v.fecha.getMinutes()).padStart(2,"0");
+        tdHora.textContent=`${hh}:${mm}`;
+      }else tdHora.textContent="-";
+      tdMedio.textContent=v.medioPago||"-";
+      tdTotal.textContent=formatearMoneda(Number(v.total)||0);
+      tdTotal.style.textAlign="right";
+      tdDet.textContent=`${(v.items||[]).length} ítems`;
+      tr.append(tdHora,tdMedio,tdTotal,tdDet);
+      tbodyReportes.appendChild(tr);
+    });
+  }
+
+  // ===== OC =====
+  async function cargarOC(){
+    const q=query(collection(db,"ordenesCompra"),orderBy("creadoEn","desc"),limit(200));
+    const snap=await getDocs(q);
+    ordenes=[];
+    snap.forEach(d=>{
+      const v=d.data();
+      ordenes.push({
+        id:d.id,
+        numero:v.numero,
+        proveedorId:v.proveedorId,
+        proveedorNombre:v.proveedorNombre,
+        items:v.items||[],
+        estado:v.estado||"PENDIENTE",
+        total:Number(v.total)||0
+      });
+    });
+    renderTablaOC();
+    poblarOCPendientes();
+  }
+  function renderTablaOC(){
+    tbodyOC.innerHTML="";
+    ordenes.forEach(oc=>{
+      const tr=document.createElement("tr");
+      const tdNum=document.createElement("td");
+      const tdProv=document.createElement("td");
+      const tdEst=document.createElement("td");
+      const tdTot=document.createElement("td");
+      tdNum.textContent=oc.numero||oc.id.slice(-6);
+      tdProv.textContent=oc.proveedorNombre||oc.proveedorId||"-";
+      tdEst.textContent=oc.estado;
+      tdTot.textContent=formatearMoneda(oc.total);
+      tdTot.style.textAlign="right";
+      tr.append(tdNum,tdProv,tdEst,tdTot);
+      tbodyOC.appendChild(tr);
+    });
+  }
+  function poblarOCPendientes(){
+    selEntradaOC.innerHTML="";
+    const opt=document.createElement("option");
+    opt.value="";
+    opt.textContent="(Seleccionar OC pendiente)";
+    selEntradaOC.appendChild(opt);
+    ordenes.filter(o=>o.estado==="PENDIENTE").forEach(o=>{
+      const p=document.createElement("option");
+      p.value=o.id;
+      p.textContent=(o.numero||o.id.slice(-6))+" - "+(o.proveedorNombre||"");
+      selEntradaOC.appendChild(p);
+    });
+  }
+  function renderOCItemsTemp(){
+    tbodyOCItems.innerHTML="";
+    ocItemsTemp.forEach(it=>{
+      const tr=document.createElement("tr");
+      const tdCod=document.createElement("td");
+      const tdDesc=document.createElement("td");
+      const tdCant=document.createElement("td");
+      const tdPrecio=document.createElement("td");
+      tdCod.textContent=it.codigo;
+      tdDesc.textContent=it.descripcion;
+      tdCant.textContent=it.cantidad;
+      tdCant.style.textAlign="right";
+      tdPrecio.textContent=formatearMoneda(it.precio);
+      tdPrecio.style.textAlign="right";
+      tr.append(tdCod,tdDesc,tdCant,tdPrecio);
+      tbodyOCItems.appendChild(tr);
+    });
+  }
+  function agregarItemOC(){
+    const cod=txtOCCod.value.trim();
+    const cant=Number(txtOCCant.value.replace(",",".")||0);
+    const precio=Number(txtOCPrecio.value.replace(",",".")||0);
+    if(!cod || cant<=0 || precio<=0){
+      lblOCEstado.textContent="Completar código, cantidad y precio.";
+      return;
+    }
+    const prod=buscarProducto(cod);
+    const desc=prod?prod.descripcion:"(SIN DESC)";
+    ocItemsTemp.push({codigo:cod,descripcion:desc,cantidad:cant,precio});
+    renderOCItemsTemp();
+    txtOCCod.value="";
+    txtOCCant.value="";
+    txtOCPrecio.value="";
+    txtOCCod.focus();
+    lblOCEstado.textContent=`Ítem ${cod} agregado.`;
+  }
+  async function guardarOC(){
+    const provId=selOCProv.value;
+    if(!provId){lblOCEstado.textContent="Seleccioná proveedor.";return;}
+    if(ocItemsTemp.length===0){lblOCEstado.textContent="Agregá al menos un ítem.";return;}
+    const prov=proveedores.find(p=>p.id===provId);
+    const total=ocItemsTemp.reduce((s,it)=>s+it.cantidad*it.precio,0);
+    const numero="OC-"+Date.now().toString().slice(-6);
+    try{
+      const ref=await addDoc(collection(db,"ordenesCompra"),{
+        numero,
+        proveedorId:provId,
+        proveedorNombre:prov?prov.nombre:"",
+        items:ocItemsTemp,
+        estado:"PENDIENTE",
+        total,
+        creadoEn:serverTimestamp()
+      });
+      ordenes.push({id:ref.id,numero,proveedorId:provId,proveedorNombre:prov?prov.nombre:"",items:ocItemsTemp,estado:"PENDIENTE",total});
+      ocItemsTemp=[];
+      renderOCItemsTemp();
+      renderTablaOC();
+      poblarOCPendientes();
+      lblOCEstado.textContent="OC guardada ✔";
+    }catch(err){
+      lblOCEstado.textContent="Error: "+err.message;
+    }
+  }
+
+  // ===== Entradas =====
+  async function cargarEntradas(){
+    const q=query(collection(db,"entradasMercaderia"),orderBy("creadoEn","desc"),limit(200));
+    const snap=await getDocs(q);
+    entradas=[];
+    snap.forEach(d=>{
+      const v=d.data();
+      entradas.push({
+        id:d.id,
+        tipo:v.tipo,
+        origen:v.origen,
+        items:v.items||[],
+        creadoEn:v.creadoEn
+      });
+    });
+    renderEntradas();
+  }
+  function renderEntradas(){
+    tbodyEntradas.innerHTML="";
+    entradas.forEach(e=>{
+      const tr=document.createElement("tr");
+      const tdFecha=document.createElement("td");
+      const tdOrigen=document.createElement("td");
+      const tdTotal=document.createElement("td");
+      if(e.creadoEn && e.creadoEn.toDate){
+        const f=e.creadoEn.toDate();
+        const dd=String(f.getDate()).padStart(2,"0");
+        const mm=String(f.getMonth()+1).padStart(2,"0");
+        const hh=String(f.getHours()).padStart(2,"0");
+        const mmin=String(f.getMinutes()).padStart(2,"0");
+        tdFecha.textContent=`${dd}/${mm} ${hh}:${mmin}`;
+      }else tdFecha.textContent="-";
+      tdOrigen.textContent=e.origen||e.tipo;
+      tdTotal.textContent=String(e.items.length);
+      tdTotal.style.textAlign="right";
+      tr.append(tdFecha,tdOrigen,tdTotal);
+      tbodyEntradas.appendChild(tr);
+    });
+  }
+  function actualizarVistaEntradaOCSeleccionada(){
+    const id=selEntradaOC.value;
+    tbodyEntradaOCItems.innerHTML="";
+    if(!id)return;
+    const oc=ordenes.find(o=>o.id===id);
+    if(!oc)return;
+    oc.items.forEach(it=>{
+      const tr=document.createElement("tr");
+      const tdCod=document.createElement("td");
+      const tdDesc=document.createElement("td");
+      const tdCant=document.createElement("td");
+      tdCod.textContent=it.codigo;
+      tdDesc.textContent=it.descripcion;
+      tdCant.textContent=it.cantidad;
+      tdCant.style.textAlign="right";
+      tr.append(tdCod,tdDesc,tdCant);
+      tbodyEntradaOCItems.appendChild(tr);
+    });
+  }
+  async function confirmarEntradaDesdeOC(){
+    const id=selEntradaOC.value;
+    if(!id){lblEntradaEstado.textContent="Seleccioná una OC.";return;}
+    const oc=ordenes.find(o=>o.id===id);
+    if(!oc){lblEntradaEstado.textContent="OC no encontrada.";return;}
+    try{
+      const entRef=await addDoc(collection(db,"entradasMercaderia"),{
+        tipo:"OC",
+        origen:oc.numero,
+        items:oc.items,
+        creadoEn:serverTimestamp()
+      });
+      entradas.unshift({id:entRef.id,tipo:"OC",origen:oc.numero,items:oc.items,creadoEn:serverTimestamp()});
+      for(const it of oc.items){
+        await ajustarStockProducto(it.codigo,it.cantidad);
+      }
+      await updateDoc(doc(db,"ordenesCompra",oc.id),{estado:"RECIBIDA"});
+      oc.estado="RECIBIDA";
+      renderTablaOC();
+      poblarOCPendientes();
+      renderStock();
+      await cargarEntradas();
+      lblEntradaEstado.textContent="Entrada registrada y stock actualizado ✔";
+    }catch(err){
+      lblEntradaEstado.textContent="Error: "+err.message;
+    }
+  }
+  async function registrarEntradaManual(){
+    const cod=txtEntCod.value.trim();
+    const cant=Number(txtEntCant.value.replace(",",".")||0);
+    if(!cod || cant<=0){
+      lblEntradaEstado.textContent="Completar código y cantidad.";
+      return;
+    }
+    const prod=buscarProducto(cod);
+    if(!prod){
+      lblEntradaEstado.textContent="Producto no encontrado. Cargalo en P primero.";
+      return;
+    }
+    const provId=selEntradaProv.value||null;
+    let origen="MANUAL";
+    if(provId){
+      const p=proveedores.find(x=>x.id===provId);
+      origen="MANUAL - "+(p?p.nombre:"");
+    }
+    try{
+      const entRef=await addDoc(collection(db,"entradasMercaderia"),{
+        tipo:"MANUAL",
+        origen,
+        items:[{codigo:cod,descripcion:prod.descripcion,cantidad:cant}],
+        creadoEn:serverTimestamp()
+      });
+      entradas.unshift({id:entRef.id,tipo:"MANUAL",origen,items:[{codigo:cod,cantidad:cant}],creadoEn:serverTimestamp()});
+      await ajustarStockProducto(cod,cant);
+      renderStock();
+      await cargarEntradas();
+      txtEntCod.value="";
+      txtEntCant.value="";
+      txtEntCod.focus();
+      lblEntradaEstado.textContent="Entrada manual registrada ✔";
+    }catch(err){
+      lblEntradaEstado.textContent="Error: "+err.message;
+    }
+  }
+
+  // ===== Cambio de módulos =====
+  function resetModos(){
+    modoCobro=modoProductos=modoProveedores=modoStock=modoOC=modoEntradas=modoReportes=false;
+    overlayCobro.classList.remove("active");
+    overlayProductos.classList.remove("active");
+    overlayProveedores.classList.remove("active");
+    overlayStock.classList.remove("active");
+    overlayOC.classList.remove("active");
+    overlayEntradas.classList.remove("active");
+    overlayReportes.classList.remove("active");
+    tabVentas.classList.remove("active");
+    tabProductos.classList.remove("active");
+    tabProveedores.classList.remove("active");
+    tabStock.classList.remove("active");
+    tabOC.classList.remove("active");
+    tabEntradas.classList.remove("active");
+    tabReportes.classList.remove("active");
+  }
+  function irAVentas(){
+    resetModos();
+    lblModulo.textContent="VENTAS";
+    lblEstado.textContent="LISTO";
+    tabVentas.classList.add("active");
+    mostrarMensaje("Modo ventas.");
+  }
+  function abrirProductos(){
+    resetModos();
+    modoProductos=true;
+    overlayProductos.classList.add("active");
+    lblModulo.textContent="PRODUCTOS";
+    lblEstado.textContent="GESTIÓN PRODUCTOS";
+    tabProductos.classList.add("active");
+    txtProdCodigo.focus();
+    mostrarMensaje("Módulo productos. Esc para volver.");
+  }
+  function abrirProveedores(){
+    resetModos();
+    modoProveedores=true;
+    overlayProveedores.classList.add("active");
+    lblModulo.textContent="PROVEEDORES";
+    lblEstado.textContent="GESTIÓN PROVEEDORES";
+    tabProveedores.classList.add("active");
+    txtProvCodigo.focus();
+    mostrarMensaje("Módulo proveedores. Esc para volver.");
+  }
+  function abrirStock(){
+    resetModos();
+    modoStock=true;
+    overlayStock.classList.add("active");
+    lblModulo.textContent="STOCK";
+    lblEstado.textContent="CONSULTA STOCK";
+    tabStock.classList.add("active");
+    renderStock();
+    mostrarMensaje("Módulo stock. Solo consulta.");
+  }
+  function abrirOC(){
+    resetModos();
+    modoOC=true;
+    overlayOC.classList.add("active");
+    lblModulo.textContent="ORDENES";
+    lblEstado.textContent="ORDENES COMPRA";
+    tabOC.classList.add("active");
+    ocItemsTemp=[];
+    renderOCItemsTemp();
+    cargarOC();
+    selOCProv.focus();
+    mostrarMensaje("Módulo Órdenes de compra. Esc para volver.");
+  }
+  function abrirEntradas(){
+    resetModos();
+    modoEntradas=true;
+    overlayEntradas.classList.add("active");
+    lblModulo.textContent="ENTRADAS";
+    lblEstado.textContent="ENTRADAS MERCADERIA";
+    tabEntradas.classList.add("active");
+    cargarOC().then(()=>poblarOCPendientes());
+    cargarEntradas();
+    selTipoEntrada.value="OC";
+    cambiarTipoEntrada();
+    mostrarMensaje("Módulo Entradas. Esc para volver.");
+  }
+  function abrirReportes(){
+    resetModos();
+    modoReportes=true;
+    overlayReportes.classList.add("active");
+    lblModulo.textContent="REPORTES";
+    lblEstado.textContent="VENTAS DIA";
+    tabReportes.classList.add("active");
+    cargarReportesHoy();
+    mostrarMensaje("Módulo reportes. Esc para volver.");
+  }
+
+  // ===== eventos de ui =====
+  btnProdGuardar.addEventListener("click",(e)=>{e.preventDefault();guardarProducto();});
+  txtProdStock.addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();guardarProducto();}});
+  txtProdCodigo.addEventListener("blur",()=>{ if(txtProdCodigo.value.trim()) cargarProductoEnFormulario(txtProdCodigo.value.trim()); });
+
+  btnProvGuardar.addEventListener("click",(e)=>{e.preventDefault();guardarProveedor();});
+  btnProvEliminar.addEventListener("click",(e)=>{e.preventDefault();eliminarProveedor();});
+  txtProvContacto.addEventListener("keydown",(e)=>{if(e.key==="Enter"){e.preventDefault();guardarProveedor();}});
+
+  btnOCAddItem.addEventListener("click",(e)=>{e.preventDefault();agregarItemOC();});
+  btnOCGuardar.addEventListener("click",(e)=>{e.preventDefault();guardarOC();});
+  selEntradaOC.addEventListener("change",actualizarVistaEntradaOCSeleccionada);
+
+  selTipoEntrada.addEventListener("change",cambiarTipoEntrada);
+  function cambiarTipoEntrada(){
+    const tipo=selTipoEntrada.value;
+    if(tipo==="OC"){
+      bloqueEntradaOC.style.display="block";
+      bloqueEntradaManual.style.display="none";
+    }else{
+      bloqueEntradaOC.style.display="none";
+      bloqueEntradaManual.style.display="block";
+      txtEntCod.focus();
+    }
+  }
+  btnConfirmarEntradaOC.addEventListener("click",(e)=>{e.preventDefault();confirmarEntradaDesdeOC();});
+  btnAgregarEntradaManual.addEventListener("click",(e)=>{e.preventDefault();registrarEntradaManual();});
+
+  txtImporteRecibido.addEventListener("input",recalcularVuelto);
+
+  tabVentas.addEventListener("click",irAVentas);
+  tabProductos.addEventListener("click",abrirProductos);
+  tabProveedores.addEventListener("click",abrirProveedores);
+  tabStock.addEventListener("click",abrirStock);
+  tabOC.addEventListener("click",abrirOC);
+  tabEntradas.addEventListener("click",abrirEntradas);
+  tabReportes.addEventListener("click",abrirReportes);
+
+  // ===== teclado global =====
+  document.addEventListener("keydown",(e)=>{
+    if(["ArrowUp","ArrowDown"," "].includes(e.key)) e.preventDefault();
+
+    if(e.ctrlKey && (e.key==="l"||e.key==="L")){
+      mostrarMensaje("Mensaje limpio.");
+      return;
+    }
+
+    if(e.key==="Escape"){
+      if(modoCobro){cerrarCobro();mostrarMensaje("Cobro cancelado.");return;}
+      if(modoProductos||modoProveedores||modoStock||modoOC||modoEntradas||modoReportes){
+        irAVentas();
+        return;
+      }
+      codeBuffer="";
+      actualizarCodeBuffer();
+      mostrarMensaje("Entrada cancelada.");
+      return;
+    }
+
+    if(modoProductos || modoProveedores || modoOC || modoEntradas || modoReportes){
+      if(!modoCobro){
+        if(e.key==="v"||e.key==="V"){irAVentas();return;}
+      }
+      return;
+    }
+
+    if(!modoCobro){
+      if(e.key==="v"||e.key==="V"){irAVentas();return;}
+      if(e.key==="p"||e.key==="P"){abrirProductos();return;}
+      if(e.key==="b"||e.key==="B"){abrirProveedores();return;}
+      if(e.key==="s"||e.key==="S"){abrirStock();return;}
+      if(e.key==="o"||e.key==="O"){abrirOC();return;}
+      if(e.key==="e"||e.key==="E"){abrirEntradas();return;}
+      if(e.key==="r"||e.key==="R"){abrirReportes();return;}
+    }
+
+    if(modoCobro){
+      if(["1","2","3","4"].includes(e.key)){
+        if(e.key==="1")marcarMedio("EFECTIVO");
+        if(e.key==="2")marcarMedio("DEBITO");
+        if(e.key==="3")marcarMedio("CREDITO");
+        if(e.key==="4")marcarMedio("QR");
+        return;
+      }
+      if(e.key==="Enter"){confirmarCobro();return;}
+      if(e.target!==txtImporteRecibido) txtImporteRecibido.focus();
+      setTimeout(recalcularVuelto,10);
+      return;
+    }
+
+    if(e.key==="ArrowUp"){
+      if(ticketItems.length===0)return;
+      selectedIndex=Math.max(0,selectedIndex-1);
+      renderTicket();
+      return;
+    }
+    if(e.key==="ArrowDown"){
+      if(ticketItems.length===0)return;
+      selectedIndex=Math.min(ticketItems.length-1,selectedIndex+1);
+      renderTicket();
+      return;
+    }
+    if(e.key==="+"){ajustarCantidad(1);return;}
+    if(e.key==="-"){ajustarCantidad(-1);return;}
+    if(e.key==="Delete"){eliminarLinea();return;}
+    if(e.key==="n"||e.key==="N"){nuevoTicket();return;}
+    if(e.key==="f"||e.key==="F"){abrirCobro();return;}
+
+    if(e.key>="0" && e.key<="9"){
+      if(codeBuffer.length<20){
+        codeBuffer+=e.key;
+        actualizarCodeBuffer();
+      }
+      return;
+    }
+    if(e.key==="Backspace"){
+      codeBuffer=codeBuffer.slice(0,-1);
+      actualizarCodeBuffer();
+      return;
+    }
+    if(e.key==="Enter"){
+      if(codeBuffer!==""){
+        const codigo=codeBuffer;
+        codeBuffer="";
+        actualizarCodeBuffer();
+        agregarProductoPorCodigo(codigo);
+      }
+      return;
+    }
+  });
+
+  // ===== init =====
+  (async()=>{
+    mostrarMensaje("Conectando a Firebase y cargando datos iniciales...");
+    await Promise.all([cargarProductos(),cargarProveedores(),cargarOC(),cargarEntradas()]);
+    nuevoTicket();
+    irAVentas();
+  })();
+</script>
+</body>
+</html>
