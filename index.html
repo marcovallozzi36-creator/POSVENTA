@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>🛒 Lista de Súper con Escáner</title>
+  <title>🛒 Lista Súper + Precios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-  <!-- ZXing para leer códigos de barras (desde CDN) -->
+  <!-- ZXing para leer códigos de barras -->
   <script src="https://unpkg.com/@zxing/library@latest"></script>
 
   <style>
@@ -42,7 +42,7 @@
 
     .app {
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto;
       padding: 12px 10px 18px;
       display: flex;
@@ -264,15 +264,9 @@
     }
 
     @keyframes scanMove {
-      0% {
-        top: 20%;
-      }
-      50% {
-        top: 75%;
-      }
-      100% {
-        top: 20%;
-      }
+      0% { top: 20%; }
+      50% { top: 75%; }
+      100% { top: 20%; }
     }
 
     .scanner-footer {
@@ -289,16 +283,10 @@
       color: var(--accent);
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
     .field-row {
       display: flex;
       gap: 6px;
+      margin-bottom: 4px;
     }
 
     input[type="text"],
@@ -323,7 +311,7 @@
     }
 
     .list-container {
-      max-height: 52vh;
+      max-height: 38vh;
       overflow-y: auto;
       padding-right: 2px;
       margin-top: 4px;
@@ -355,6 +343,7 @@
       border-radius: 12px;
       background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
       border: 1px solid rgba(31, 41, 55, 0.95);
+      font-size: 0.8rem;
     }
 
     .item-main {
@@ -362,23 +351,11 @@
       min-width: 0;
     }
 
-    .item-top {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-    }
-
     .item-name {
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .item-name.empty {
-      color: var(--muted);
-      font-style: italic;
     }
 
     .item-code {
@@ -396,7 +373,7 @@
       color: var(--muted);
     }
 
-    .qty-badge {
+    .badge {
       padding: 2px 7px;
       border-radius: 999px;
       border: 1px solid rgba(55, 65, 81, 0.95);
@@ -414,26 +391,6 @@
       min-width: 28px;
     }
 
-    .checkbox-wrap {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #22c55e;
-    }
-
-    .item.done {
-      opacity: 0.6;
-    }
-
-    .item.done .item-name {
-      text-decoration: line-through;
-    }
-
     .footer-row {
       margin-top: 4px;
       display: flex;
@@ -446,6 +403,132 @@
 
     .footer-row strong {
       color: var(--accent);
+    }
+
+    .report-list {
+      max-height: 26vh;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-top: 6px;
+    }
+
+    .report-item {
+      border-radius: 10px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+    }
+
+    .report-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .report-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .report-code {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .report-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .delta-up {
+      color: #22c55e;
+    }
+
+    .delta-down {
+      color: #f97316;
+    }
+
+    .chart-wrapper {
+      margin-bottom: 6px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    select {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6);
+    }
+
+    #price-chart {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: #020617;
+    }
+
+    #chart-empty {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .purchases-list {
+      max-height: 26vh;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .purchase-item {
+      border-radius: 10px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+    }
+
+    .purchase-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .purchase-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .purchase-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
     }
 
     .toast {
@@ -474,528 +557,918 @@
     }
 
     @media (max-width: 380px) {
-      header h1 {
-        font-size: 1rem;
-      }
-      .card-header h2 {
-        font-size: 0.9rem;
-      }
-      .scanner-video-wrapper {
-        max-height: 220px;
-      }
+      header h1 { font-size: 1rem; }
+      .card-header h2 { font-size: 0.9rem; }
+      .scanner-video-wrapper { max-height: 220px; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="title-block">
-        <h1><span>🛒</span> Lista Súper Pro</h1>
-        <p>Escaneá códigos y armá tu lista desde el celu.</p>
+<div class="app">
+  <header>
+    <div class="title-block">
+      <h1><span>🛒</span> Lista Súper + Precios</h1>
+      <p>Escaneá, cargá precios y compará cada compra.</p>
+    </div>
+    <div class="pill">
+      <div class="pill-dot"></div>
+      Modo ahorro on
+    </div>
+  </header>
+
+  <main>
+    <!-- SCAN CARD -->
+    <section class="card" id="scan-card">
+      <div class="card-header">
+        <h2>📷 Escanear producto</h2>
+        <small id="camera-status-text">Cámara lista</small>
       </div>
-      <div class="pill">
-        <div class="pill-dot"></div>
-        Live · Modo Shopper
+
+      <button class="btn btn-primary" id="btn-start-scan">
+        📷 Escanear código
+      </button>
+      <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="margin-top:6px; display:none;">
+        ⏹️ Detener escáner
+      </button>
+
+      <div class="scanner-container" id="scanner-container">
+        <div class="scanner-header">
+          <span><span class="dot-live"></span> Escaneando…</span>
+          <span id="camera-name">Cámara trasera</span>
+        </div>
+        <div class="scanner-video-wrapper">
+          <video id="video" playsinline></video>
+          <div class="scan-overlay"></div>
+          <div class="scan-line"></div>
+        </div>
+        <div class="scanner-footer">
+          <span>Apuntá el código dentro del recuadro 👆</span>
+          <span>Último: <strong id="last-code">–</strong></span>
+        </div>
       </div>
-    </header>
+    </section>
 
-    <main>
-      <!-- SCAN CARD -->
-      <section class="card" id="scan-card">
-        <div class="card-header">
-          <h2>📷 Escanear producto</h2>
-          <small id="camera-status-text">Cámara lista</small>
-        </div>
+    <!-- LISTA ACTUAL -->
+    <section class="card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+      <div class="card-header">
+        <h2>🧺 Lista de la compra actual</h2>
+        <small id="summary-text">0 productos · $0</small>
+      </div>
 
-        <button class="btn btn-primary" id="btn-start-scan">
-          📷 Escanear código
+      <div class="field-row">
+        <input
+          type="text"
+          id="store-name"
+          placeholder="Nombre del súper / negocio (ej: Disco, Chino de la esquina)"
+          autocomplete="off"
+        />
+        <button class="btn btn-secondary btn-sm" id="btn-close-purchase">
+          ✅ Cerrar compra
         </button>
-        <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="margin-top:6px; display:none;">
-          ⏹️ Detener escáner
+      </div>
+
+      <div class="list-container">
+        <div id="empty-state" class="list-empty">
+          Todavía no agregaste nada. Empezá escaneando en el súper.
+        </div>
+        <ul class="items" id="items-list"></ul>
+      </div>
+
+      <div class="footer-row">
+        <span id="total-text">Total estimado: $0</span>
+        <button class="btn btn-danger btn-sm" id="btn-clear-list">
+          🗑️ Limpiar lista
         </button>
+      </div>
+    </section>
 
-        <div class="scanner-container" id="scanner-container">
-          <div class="scanner-header">
-            <span><span class="dot-live"></span> Escaneando…</span>
-            <span id="camera-name">Cámara trasera</span>
-          </div>
-          <div class="scanner-video-wrapper">
-            <video id="video" playsinline></video>
-            <div class="scan-overlay"></div>
-            <div class="scan-line"></div>
-          </div>
-          <div class="scanner-footer">
-            <span>Apuntá el código dentro del recuadro 👆</span>
-            <span>Último: <strong id="last-code">–</strong></span>
-          </div>
+    <!-- REPORTE PRECIOS -->
+    <section class="card">
+      <div class="card-header">
+        <h2>📊 Reporte de precios</h2>
+        <small>Último precio por producto (vs compra anterior).</small>
+      </div>
+
+      <div class="chart-wrapper">
+        <div class="chart-header">
+          <span>📈 Evolución de precio:</span>
+          <select id="chart-product-select">
+            <option value="">Elegí un producto…</option>
+          </select>
         </div>
-      </section>
+        <canvas id="price-chart" height="130"></canvas>
+        <div id="chart-empty">Seleccioná un producto con historial para ver el gráfico.</div>
+      </div>
 
-      <!-- ADD MANUAL CARD -->
-      <section class="card">
-        <div class="card-header">
-          <h2>➕ Agregar manual</h2>
-          <small>Por si el código falla o querés algo rápido.</small>
+      <div class="report-list" id="report-list">
+        <div class="list-empty" id="report-empty">
+          Aún no hay historial. Cuando escanees y cargues precios, se verá acá.
         </div>
-        <form id="manual-form">
-          <div class="field-row">
-            <input
-              type="text"
-              id="manual-name"
-              placeholder="Nombre del producto"
-              autocomplete="off"
-              required
-            />
-          </div>
-          <div class="field-row">
-            <input
-              type="number"
-              id="manual-qty"
-              min="1"
-              step="1"
-              value="1"
-            />
-            <button type="submit" class="btn btn-secondary">
-              ✅ Agregar
-            </button>
-          </div>
-        </form>
-      </section>
+      </div>
+    </section>
 
-      <!-- LIST CARD -->
-      <section class="card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
-        <div class="card-header">
-          <h2>📋 Mi lista</h2>
-          <small id="summary-text">0 productos</small>
+    <!-- HISTORIAL DE COMPRAS -->
+    <section class="card">
+      <div class="card-header">
+        <h2>🧾 Historial de compras</h2>
+        <small>Últimos tickets cerrados.</small>
+      </div>
+      <div class="purchases-list" id="purchases-list">
+        <div class="list-empty" id="purchases-empty">
+          Todavía no cerraste ninguna compra.
         </div>
+      </div>
+    </section>
+  </main>
+</div>
 
-        <div class="list-container">
-          <div id="empty-state" class="list-empty">
-            🧺 Todavía no agregaste nada. Empezá escaneando o cargando manualmente.
-          </div>
-          <ul class="items" id="items-list"></ul>
-        </div>
+<div class="toast" id="toast">
+  ✅ Producto agregado
+</div>
 
-        <div class="footer-row">
-          <span id="items-counter">0 de 0 comprados</span>
-          <button class="btn btn-danger btn-sm" id="btn-clear">
-            🗑️ Vaciar lista
-          </button>
-        </div>
-      </section>
-    </main>
-  </div>
+<script>
+  // ---------------------------
+  // Claves de storage y estado
+  // ---------------------------
+  const PRODUCTS_KEY  = "ls_super_products_v1";
+  const HISTORY_KEY   = "ls_super_price_history_v1";
+  const LIST_KEY      = "ls_super_current_list_v2"; // ahora guarda {storeName, items}
+  const PURCHASES_KEY = "ls_super_purchases_v1";
 
-  <div class="toast" id="toast">
-    ✅ Producto agregado
-  </div>
+  let products      = []; // {id, code, name}
+  let priceHistory  = []; // {id, productId, price, date}
+  let currentList   = []; // {productId, qty, price}
+  let currentStore  = "";
+  let purchases     = []; // {id, storeName, date, total, items: [...]}
 
-  <script>
-    // ---------------------------
-    // Estado y helpers
-    // ---------------------------
-    const STORAGE_KEY = "listaSuperScanner_v1";
-    let items = [];
-    let codeReader = null;
-    let currentDeviceId = null;
-    let scanning = false;
+  // Scanner
+  let codeReader = null;
+  let currentDeviceId = null;
+  let scanning = false;
 
-    const btnStartScan = document.getElementById("btn-start-scan");
-    const btnStopScan = document.getElementById("btn-stop-scan");
-    const scannerContainer = document.getElementById("scanner-container");
-    const videoElement = document.getElementById("video");
-    const lastCodeEl = document.getElementById("last-code");
-    const cameraStatusText = document.getElementById("camera-status-text");
-    const cameraNameEl = document.getElementById("camera-name");
+  // DOM
+  const btnStartScan       = document.getElementById("btn-start-scan");
+  const btnStopScan        = document.getElementById("btn-stop-scan");
+  const scannerContainer   = document.getElementById("scanner-container");
+  const videoElement       = document.getElementById("video");
+  const lastCodeEl         = document.getElementById("last-code");
+  const cameraStatusText   = document.getElementById("camera-status-text");
+  const cameraNameEl       = document.getElementById("camera-name");
 
-    const manualForm = document.getElementById("manual-form");
-    const manualNameInput = document.getElementById("manual-name");
-    const manualQtyInput = document.getElementById("manual-qty");
+  const itemsListEl        = document.getElementById("items-list");
+  const emptyStateEl       = document.getElementById("empty-state");
+  const summaryTextEl      = document.getElementById("summary-text");
+  const totalTextEl        = document.getElementById("total-text");
+  const btnClearList       = document.getElementById("btn-clear-list");
+  const btnClosePurchase   = document.getElementById("btn-close-purchase");
+  const storeNameInput     = document.getElementById("store-name");
 
-    const itemsListEl = document.getElementById("items-list");
-    const emptyStateEl = document.getElementById("empty-state");
-    const summaryTextEl = document.getElementById("summary-text");
-    const itemsCounterEl = document.getElementById("items-counter");
-    const btnClear = document.getElementById("btn-clear");
-    const toastEl = document.getElementById("toast");
+  const reportListEl       = document.getElementById("report-list");
+  const reportEmptyEl      = document.getElementById("report-empty");
+  const chartProductSelect = document.getElementById("chart-product-select");
+  const priceChartCanvas   = document.getElementById("price-chart");
+  const chartEmptyEl       = document.getElementById("chart-empty");
 
-    function showToast(message) {
-      toastEl.textContent = message;
-      toastEl.classList.add("show");
-      setTimeout(() => {
-        toastEl.classList.remove("show");
-      }, 1500);
-    }
+  const purchasesListEl    = document.getElementById("purchases-list");
+  const purchasesEmptyEl   = document.getElementById("purchases-empty");
 
-    function saveItems() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
+  const toastEl            = document.getElementById("toast");
 
-    function loadItems() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          items = JSON.parse(raw) || [];
+  let chartSelectedProductId = "";
+
+  // ---------------------------
+  // Helpers
+  // ---------------------------
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add("show");
+    setTimeout(() => toastEl.classList.remove("show"), 1500);
+  }
+
+  function saveState() {
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(priceHistory));
+    localStorage.setItem(LIST_KEY, JSON.stringify({
+      storeName: currentStore,
+      items: currentList
+    }));
+    localStorage.setItem(PURCHASES_KEY, JSON.stringify(purchases));
+  }
+
+  function loadState() {
+    try {
+      const p = localStorage.getItem(PRODUCTS_KEY);
+      const h = localStorage.getItem(HISTORY_KEY);
+      const l = localStorage.getItem(LIST_KEY);
+      const pu = localStorage.getItem(PURCHASES_KEY);
+
+      products = p ? JSON.parse(p) : [];
+      priceHistory = h ? JSON.parse(h) : [];
+
+      if (l) {
+        const parsed = JSON.parse(l);
+        if (Array.isArray(parsed)) {
+          // versión vieja -> sólo items
+          currentList = parsed;
+          currentStore = "";
         } else {
-          items = [];
+          currentList = parsed.items || [];
+          currentStore = parsed.storeName || "";
         }
-      } catch (e) {
-        console.error("Error leyendo localStorage", e);
-        items = [];
-      }
-      renderItems();
-    }
-
-    function createItem({ code = null, name = "", qty = 1, done = false }) {
-      return {
-        id: Date.now().toString(36) + Math.random().toString(16).slice(2),
-        code,
-        name,
-        qty: qty || 1,
-        done: !!done,
-      };
-    }
-
-    function addItem(item) {
-      items.push(item);
-      saveItems();
-      renderItems();
-    }
-
-    function updateItem(id, changes) {
-      const idx = items.findIndex((it) => it.id === id);
-      if (idx === -1) return;
-      items[idx] = { ...items[idx], ...changes };
-      saveItems();
-      renderItems();
-    }
-
-    function removeItem(id) {
-      items = items.filter((it) => it.id !== id);
-      saveItems();
-      renderItems();
-    }
-
-    function clearItems() {
-      if (!items.length) return;
-      const ok = confirm("¿Vaciar toda la lista?");
-      if (!ok) return;
-      items = [];
-      saveItems();
-      renderItems();
-    }
-
-    function renderItems() {
-      itemsListEl.innerHTML = "";
-
-      if (!items.length) {
-        emptyStateEl.style.display = "flex";
       } else {
-        emptyStateEl.style.display = "none";
+        currentList = [];
+        currentStore = "";
       }
 
-      let doneCount = 0;
-      let totalQty = 0;
-
-      items.forEach((item) => {
-        if (item.done) doneCount++;
-        totalQty += Number(item.qty) || 0;
-
-        const li = document.createElement("li");
-        li.className = "item" + (item.done ? " done" : "");
-        li.dataset.id = item.id;
-
-        const checkboxWrap = document.createElement("div");
-        checkboxWrap.className = "checkbox-wrap";
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = item.done;
-        checkbox.dataset.action = "toggle-done";
-        checkboxWrap.appendChild(checkbox);
-
-        const main = document.createElement("div");
-        main.className = "item-main";
-
-        const top = document.createElement("div");
-        top.className = "item-top";
-
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "item-name" + (item.name ? "" : " empty");
-        nameSpan.textContent = item.name || "Sin nombre";
-        top.appendChild(nameSpan);
-
-        if (item.code) {
-          const codeSpan = document.createElement("span");
-          codeSpan.className = "item-code";
-          codeSpan.textContent = "· " + item.code;
-          top.appendChild(codeSpan);
-        }
-
-        const bottom = document.createElement("div");
-        bottom.className = "item-bottom";
-
-        const qtySpan = document.createElement("span");
-        qtySpan.className = "qty-badge";
-        qtySpan.textContent = "Cantidad: " + (item.qty || 1);
-        bottom.appendChild(qtySpan);
-
-        const infoSpan = document.createElement("span");
-        infoSpan.textContent = item.done ? "✔️ Comprado" : "🕒 Pendiente";
-        bottom.appendChild(infoSpan);
-
-        main.appendChild(top);
-        main.appendChild(bottom);
-
-        const actions = document.createElement("div");
-        actions.className = "item-actions";
-
-        const btnEdit = document.createElement("button");
-        btnEdit.className = "btn btn-secondary btn-sm";
-        btnEdit.textContent = "✏️";
-        btnEdit.title = "Editar nombre / cantidad";
-        btnEdit.dataset.action = "edit";
-
-        const btnDelete = document.createElement("button");
-        btnDelete.className = "btn btn-danger btn-sm";
-        btnDelete.textContent = "🗑️";
-        btnDelete.title = "Eliminar";
-        btnDelete.dataset.action = "delete";
-
-        actions.appendChild(btnEdit);
-        actions.appendChild(btnDelete);
-
-        li.appendChild(checkboxWrap);
-        li.appendChild(main);
-        li.appendChild(actions);
-
-        itemsListEl.appendChild(li);
-      });
-
-      summaryTextEl.textContent = `${items.length} productos · ${totalQty} unidades`;
-      itemsCounterEl.textContent = `${doneCount} de ${items.length} comprados`;
+      purchases = pu ? JSON.parse(pu) : [];
+    } catch (e) {
+      console.error("Error leyendo localStorage", e);
+      products = [];
+      priceHistory = [];
+      currentList = [];
+      currentStore = "";
+      purchases = [];
     }
 
-    // ---------------------------
-    // Lógica de escaneo
-    // ---------------------------
-    async function initCodeReaderIfNeeded() {
-      if (codeReader) return;
-      if (!window.ZXing || !ZXing.BrowserMultiFormatReader) {
-        alert("No se pudo cargar el lector de códigos. Revisá tu conexión.");
-        return;
-      }
-      codeReader = new ZXing.BrowserMultiFormatReader();
+    storeNameInput.value = currentStore;
+    renderList();
+    renderReport();
+    renderPurchases();
+  }
+
+  function createId() {
+    return Date.now().toString(36) + Math.random().toString(16).slice(2);
+  }
+
+  function findProductByCode(code) {
+    return products.find(p => p.code === code);
+  }
+
+  function ensureProductForCode(code) {
+    let prod = findProductByCode(code);
+    if (prod) return prod;
+
+    const name = prompt(
+      "Nuevo producto detectado.\n\nCódigo: " + code + "\n\nNombre del producto:"
+    );
+    if (name === null) return null; // canceló
+
+    const cleanName = (name || "").trim() || "Producto sin nombre";
+    prod = {
+      id: createId(),
+      code,
+      name: cleanName
+    };
+    products.push(prod);
+    saveState();
+    return prod;
+  }
+
+  function parsePriceInput(input, lastPrice) {
+    if (input === null) return null;
+    let str = input.trim().replace(",", ".");
+    if (!str) {
+      if (lastPrice != null) return lastPrice;
+      return null;
     }
+    const value = Number(str);
+    if (isNaN(value) || value <= 0) return null;
+    return value;
+  }
 
-    async function startScanner() {
-      try {
-        await initCodeReaderIfNeeded();
-        if (!codeReader) return;
+  function formatMoney(v) {
+    return v.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          alert("Tu navegador no permite usar la cámara desde la web.");
-          return;
-        }
+  function formatDate(dStr) {
+    const d = new Date(dStr);
+    if (isNaN(d)) return dStr;
+    return d.toLocaleString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
 
-        cameraStatusText.textContent = "Buscando cámara…";
+  function getHistoryForProduct(productId) {
+    return priceHistory
+      .filter(h => h.productId === productId)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
 
-        const devices = await codeReader.listVideoInputDevices();
-        if (!devices || !devices.length) {
-          alert("No se encontraron cámaras en este dispositivo.");
-          cameraStatusText.textContent = "Sin cámara";
-          return;
-        }
+  function getLastPrices(productId) {
+    const history = getHistoryForProduct(productId);
+    if (!history.length) return { last: null, prev: null };
+    const last = history[history.length - 1];
+    const prev = history.length > 1 ? history[history.length - 2] : null;
+    return { last, prev };
+  }
 
-        let deviceIdToUse = devices[0].deviceId;
-        const backCam = devices.find((d) =>
-          (d.label || "").toLowerCase().includes("back")
-        );
-        if (backCam) deviceIdToUse = backCam.deviceId;
+  function addPriceRecord(productId, price) {
+    const rec = {
+      id: createId(),
+      productId,
+      price,
+      date: new Date().toISOString()
+    };
+    priceHistory.push(rec);
+    saveState();
+  }
 
-        currentDeviceId = deviceIdToUse;
-
-        const deviceLabel =
-          (devices.find((d) => d.deviceId === deviceIdToUse)?.label ||
-            "Cámara") || "Cámara";
-        cameraNameEl.textContent =
-          deviceLabel.length > 30
-            ? deviceLabel.slice(0, 30) + "…"
-            : deviceLabel;
-
-        scannerContainer.style.display = "flex";
-        btnStartScan.disabled = true;
-        btnStopScan.style.display = "inline-flex";
-        cameraStatusText.textContent = "Escaneando…";
-        scanning = true;
-
-        lastCodeEl.textContent = "–";
-
-        await codeReader.decodeFromVideoDevice(
-          deviceIdToUse,
-          videoElement,
-          (result, err) => {
-            if (!scanning) return;
-
-            if (result) {
-              const value = result.text;
-              lastCodeEl.textContent = value;
-
-              handleScannedCode(value);
-            }
-            // errores se ignoran (son normales mientras no encuentra código)
-          }
-        );
-      } catch (err) {
-        console.error("Error al iniciar el escáner", err);
-        alert(
-          "No se pudo iniciar la cámara. Revisá permisos o probá con otro navegador."
-        );
-        stopScanner();
-      }
-    }
-
-    function stopScanner() {
-      scanning = false;
-
-      if (codeReader) {
-        try {
-          codeReader.reset();
-        } catch (e) {
-          console.warn("Error reseteando codeReader", e);
-        }
-      }
-
-      if (videoElement && videoElement.srcObject) {
-        try {
-          const tracks = videoElement.srcObject.getTracks();
-          tracks.forEach((t) => t.stop());
-        } catch (e) {
-          console.warn("Error parando tracks de video", e);
-        }
-        videoElement.srcObject = null;
-      }
-
-      scannerContainer.style.display = "none";
-      btnStartScan.disabled = false;
-      btnStopScan.style.display = "none";
-      cameraStatusText.textContent = "Cámara lista";
-    }
-
-    function handleScannedCode(code) {
-      if (!code) return;
-
-      // ¿Ya existe ese código? -> sumo cantidad
-      const existing = items.find((it) => it.code === code);
-      if (existing) {
-        const newQty = (Number(existing.qty) || 0) + 1;
-        updateItem(existing.id, { qty: newQty });
-        showToast("🔁 Cantidad aumentada");
-        return;
-      }
-
-      // Si no existe, creo un item nuevo preguntando nombre
-      const name = prompt(
-        "Código detectado:\n" +
-          code +
-          "\n\nOpcional: escribí un nombre para el producto (o dejalo vacío):"
-      );
-
-      const item = createItem({
-        code,
-        name: (name || "").trim(),
+  function addToCurrentList(productId, price) {
+    const existing = currentList.find(i => i.productId === productId);
+    if (existing) {
+      existing.qty += 1;
+      existing.price = price; // último precio
+    } else {
+      currentList.push({
+        productId,
         qty: 1,
-        done: false,
+        price
       });
+    }
+    saveState();
+    renderList();
+  }
 
-      addItem(item);
-      showToast("✅ Producto agregado");
+  function clearCurrentList() {
+    if (!currentList.length && !currentStore) return;
+    const ok = confirm("¿Limpiar la lista de la compra actual? (El historial de precios se mantiene)");
+    if (!ok) return;
+    currentList = [];
+    currentStore = "";
+    storeNameInput.value = "";
+    saveState();
+    renderList();
+  }
+
+  function closeCurrentPurchase() {
+    if (!currentList.length) {
+      alert("No hay productos en la lista actual.");
+      return;
     }
 
-    // ---------------------------
-    // Eventos UI
-    // ---------------------------
-    btnStartScan.addEventListener("click", () => {
-      startScanner();
+    const total = currentList.reduce((acc, item) => acc + item.qty * item.price, 0);
+    const itemsCount = currentList.reduce((acc, item) => acc + item.qty, 0);
+
+    const storeName = currentStore.trim() || "Sin nombre";
+
+    const ok = confirm(
+      `¿Cerrar compra?\n\nSúper / negocio: ${storeName}\nProductos: ${itemsCount}\nTotal: $${formatMoney(total)}`
+    );
+    if (!ok) return;
+
+    const purchase = {
+      id: createId(),
+      storeName,
+      date: new Date().toISOString(),
+      total,
+      items: JSON.parse(JSON.stringify(currentList))
+    };
+
+    purchases.push(purchase);
+
+    // Limpiamos lista actual pero NO tocamos historial de precios
+    currentList = [];
+    currentStore = "";
+    storeNameInput.value = "";
+    saveState();
+    renderList();
+    renderPurchases();
+    showToast("🧾 Compra cerrada");
+  }
+
+  // ---------------------------
+  // Render lista actual
+  // ---------------------------
+  function renderList() {
+    itemsListEl.innerHTML = "";
+    if (!currentList.length) {
+      emptyStateEl.style.display = "flex";
+    } else {
+      emptyStateEl.style.display = "none";
+    }
+
+    let totalItems = 0;
+    let totalAmount = 0;
+
+    currentList.forEach(item => {
+      const prod = products.find(p => p.id === item.productId);
+      const name = prod ? prod.name : "Producto";
+      const code = prod ? prod.code : "";
+
+      totalItems += item.qty;
+      const subtotal = item.qty * item.price;
+      totalAmount += subtotal;
+
+      const li = document.createElement("li");
+      li.className = "item";
+      li.dataset.pid = item.productId;
+
+      const main = document.createElement("div");
+      main.className = "item-main";
+
+      const top = document.createElement("div");
+      top.style.display = "flex";
+      top.style.justifyContent = "space-between";
+      top.style.gap = "6px";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "item-name";
+      nameSpan.textContent = name;
+
+      const codeSpan = document.createElement("span");
+      codeSpan.className = "item-code";
+      codeSpan.textContent = code ? "· " + code : "";
+
+      top.appendChild(nameSpan);
+      top.appendChild(codeSpan);
+
+      const bottom = document.createElement("div");
+      bottom.className = "item-bottom";
+
+      const left = document.createElement("span");
+      left.className = "badge";
+      left.textContent = `x${item.qty} · $${formatMoney(item.price)} c/u`;
+
+      const right = document.createElement("span");
+      right.textContent = `Subtotal: $${formatMoney(subtotal)}`;
+
+      bottom.appendChild(left);
+      bottom.appendChild(right);
+
+      main.appendChild(top);
+      main.appendChild(bottom);
+
+      const actions = document.createElement("div");
+      actions.className = "item-actions";
+
+      const btnEdit = document.createElement("button");
+      btnEdit.className = "btn btn-secondary btn-sm";
+      btnEdit.textContent = "✏️";
+      btnEdit.title = "Editar cantidad / precio";
+      btnEdit.dataset.action = "edit";
+
+      const btnDelete = document.createElement("button");
+      btnDelete.className = "btn btn-danger btn-sm";
+      btnDelete.textContent = "🗑️";
+      btnDelete.title = "Quitar de la lista";
+      btnDelete.dataset.action = "delete";
+
+      actions.appendChild(btnEdit);
+      actions.appendChild(btnDelete);
+
+      li.appendChild(main);
+      li.appendChild(actions);
+
+      itemsListEl.appendChild(li);
     });
 
-    btnStopScan.addEventListener("click", () => {
-      stopScanner();
+    summaryTextEl.textContent = `${currentList.length} productos diferentes · ${totalItems} unidades`;
+    totalTextEl.textContent = `Total estimado: $${formatMoney(totalAmount)}`;
+  }
+
+  // ---------------------------
+  // Render reporte de precios
+  // ---------------------------
+  function renderReport() {
+    reportListEl.innerHTML = "";
+    chartProductSelect.innerHTML = '<option value="">Elegí un producto…</option>';
+
+    if (!products.length || !priceHistory.length) {
+      reportEmptyEl.style.display = "flex";
+      chartEmptyEl.textContent = "Seleccioná un producto con historial para ver el gráfico.";
+      const ctx = priceChartCanvas.getContext("2d");
+      ctx.clearRect(0, 0, priceChartCanvas.width, priceChartCanvas.height);
+      return;
+    }
+    reportEmptyEl.style.display = "none";
+
+    const prodsSorted = [...products].sort((a, b) =>
+      a.name.localeCompare(b.name, "es")
+    );
+
+    // Dropdown para gráfico
+    prodsSorted.forEach(prod => {
+      const history = getHistoryForProduct(prod.id);
+      if (!history.length) return;
+      const opt = document.createElement("option");
+      opt.value = prod.id;
+      opt.textContent = prod.name;
+      chartProductSelect.appendChild(opt);
     });
 
-    manualForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = manualNameInput.value.trim();
-      if (!name) return;
-
-      const qty = Number(manualQtyInput.value) || 1;
-
-      const item = createItem({
-        code: null,
-        name,
-        qty,
-        done: false,
-      });
-
-      addItem(item);
-      manualNameInput.value = "";
-      manualQtyInput.value = "1";
-      showToast("✅ Producto agregado");
-      manualNameInput.blur();
-    });
-
-    btnClear.addEventListener("click", clearItems);
-
-    itemsListEl.addEventListener("click", (e) => {
-      const target = e.target;
-      const li = target.closest(".item");
-      if (!li) return;
-      const id = li.dataset.id;
-      if (!id) return;
-
-      const action = target.dataset.action;
-      if (action === "toggle-done") {
-        const checked = target.checked;
-        updateItem(id, { done: checked });
-      } else if (action === "edit") {
-        const item = items.find((it) => it.id === id);
-        if (!item) return;
-
-        const newName = prompt(
-          "Editar nombre del producto:",
-          item.name || ""
-        );
-        if (newName === null) return;
-
-        const newQtyStr = prompt(
-          "Editar cantidad:",
-          String(item.qty || 1)
-        );
-        if (newQtyStr === null) return;
-
-        const newQty = Number(newQtyStr) || 1;
-
-        updateItem(id, { name: newName.trim(), qty: newQty });
-      } else if (action === "delete") {
-        const ok = confirm("¿Eliminar este producto?");
-        if (!ok) return;
-        removeItem(id);
+    // Mantener selección si es posible
+    if (chartSelectedProductId) {
+      const exists = Array.from(chartProductSelect.options).some(o => o.value === chartSelectedProductId);
+      if (exists) {
+        chartProductSelect.value = chartSelectedProductId;
+        drawPriceChart(chartSelectedProductId);
+      } else {
+        chartSelectedProductId = "";
+        chartProductSelect.value = "";
+        drawPriceChart("");
       }
-    });
+    }
 
-    window.addEventListener("beforeunload", () => {
-      stopScanner();
-    });
+    // Lista de productos con último precio
+    prodsSorted.forEach(prod => {
+      const { last, prev } = getLastPrices(prod.id);
+      if (!last) return; // sin precios
 
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        stopScanner();
+      const div = document.createElement("div");
+      div.className = "report-item";
+
+      const title = document.createElement("div");
+      title.className = "report-title";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "report-name";
+      nameSpan.textContent = prod.name;
+
+      const codeSpan = document.createElement("span");
+      codeSpan.className = "report-code";
+      codeSpan.textContent = prod.code ? prod.code : "";
+
+      title.appendChild(nameSpan);
+      title.appendChild(codeSpan);
+
+      const row1 = document.createElement("div");
+      row1.className = "report-row";
+
+      const lastSpan = document.createElement("span");
+      lastSpan.textContent = `Último: $${formatMoney(last.price)}`;
+
+      const deltaSpan = document.createElement("span");
+      if (prev) {
+        const diff = last.price - prev.price;
+        const pct = prev.price ? (diff / prev.price) * 100 : 0;
+        const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
+        const cls = diff > 0 ? "delta-up" : diff < 0 ? "delta-down" : "";
+        deltaSpan.className = cls;
+        deltaSpan.textContent =
+          `Anterior: $${formatMoney(prev.price)} · ${sign}${Math.abs(pct).toFixed(1)}%`;
+      } else {
+        deltaSpan.textContent = "Sin compra anterior";
       }
+
+      row1.appendChild(lastSpan);
+      row1.appendChild(deltaSpan);
+
+      div.appendChild(title);
+      div.appendChild(row1);
+      reportListEl.appendChild(div);
+    });
+  }
+
+  // ---------------------------
+  // Gráfico de evolución de precio
+  // ---------------------------
+  function drawPriceChart(productId) {
+    const ctx = priceChartCanvas.getContext("2d");
+    ctx.clearRect(0, 0, priceChartCanvas.width, priceChartCanvas.height);
+
+    if (!productId) {
+      chartEmptyEl.textContent = "Seleccioná un producto con historial para ver el gráfico.";
+      return;
+    }
+
+    const history = getHistoryForProduct(productId);
+    if (history.length < 2) {
+      chartEmptyEl.textContent = "Este producto tiene pocas mediciones para graficar.";
+      return;
+    }
+
+    chartEmptyEl.textContent = "";
+
+    const width = priceChartCanvas.width;
+    const height = priceChartCanvas.height;
+
+    // Normalizar tamaños por si el device pixel ratio cambia
+    const dpr = window.devicePixelRatio || 1;
+    priceChartCanvas.width = priceChartCanvas.clientWidth * dpr;
+    priceChartCanvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const innerPadding = 10;
+    const w = priceChartCanvas.clientWidth - innerPadding * 2;
+    const h = height - innerPadding * 2;
+
+    const prices = history.map(h => h.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    const range = maxPrice - minPrice || 1;
+
+    function xForIndex(i) {
+      if (history.length === 1) return innerPadding + w / 2;
+      return innerPadding + (w * i) / (history.length - 1);
+    }
+
+    function yForPrice(p) {
+      const ratio = (p - minPrice) / range;
+      return innerPadding + h - ratio * h;
+    }
+
+    // Ejes simples
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(55,65,81,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(innerPadding, innerPadding);
+    ctx.lineTo(innerPadding, innerPadding + h);
+    ctx.lineTo(innerPadding + w, innerPadding + h);
+    ctx.stroke();
+
+    // Línea de precio
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#22c55e";
+    ctx.beginPath();
+    history.forEach((pt, i) => {
+      const x = xForIndex(i);
+      const y = yForPrice(pt.price);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Puntos
+    ctx.fillStyle = "#22c55e";
+    history.forEach((pt, i) => {
+      const x = xForIndex(i);
+      const y = yForPrice(pt.price);
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    // ---------------------------
-    // Init
-    // ---------------------------
-    loadItems();
-  </script>
+    // Texto min / max
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "10px system-ui";
+    ctx.fillText(`Min: $${formatMoney(minPrice)}`, innerPadding + 2, innerPadding + 10);
+    ctx.fillText(
+      `Max: $${formatMoney(maxPrice)}`,
+      innerPadding + 2,
+      innerPadding + 22
+    );
+  }
+
+  // ---------------------------
+  // Render historial de compras
+  // ---------------------------
+  function renderPurchases() {
+    purchasesListEl.innerHTML = "";
+    if (!purchases.length) {
+      purchasesEmptyEl.style.display = "flex";
+      return;
+    }
+    purchasesEmptyEl.style.display = "none";
+
+    const sorted = [...purchases].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sorted.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "purchase-item";
+
+      const top = document.createElement("div");
+      top.className = "purchase-top";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "purchase-name";
+      nameSpan.textContent = p.storeName || "Sin nombre";
+
+      const totalSpan = document.createElement("span");
+      totalSpan.textContent = `$${formatMoney(p.total)}`;
+
+      top.appendChild(nameSpan);
+      top.appendChild(totalSpan);
+
+      const meta = document.createElement("div");
+      meta.className = "purchase-meta";
+
+      const dateSpan = document.createElement("span");
+      dateSpan.textContent = formatDate(p.date);
+
+      const itemsCount = p.items.reduce((acc, it) => acc + it.qty, 0);
+      const infoSpan = document.createElement("span");
+      infoSpan.textContent = `${itemsCount} u. · ${p.items.length} prod.`;
+
+      meta.appendChild(dateSpan);
+      meta.appendChild(infoSpan);
+
+      div.appendChild(top);
+      div.appendChild(meta);
+      purchasesListEl.appendChild(div);
+    });
+  }
+
+  // ---------------------------
+  // Escaneo
+  // ---------------------------
+  async function initCodeReaderIfNeeded() {
+    if (codeReader) return;
+    if (!window.ZXing || !ZXing.BrowserMultiFormatReader) {
+      alert("No se pudo cargar el lector de códigos. Revisá tu conexión.");
+      return;
+    }
+    codeReader = new ZXing.BrowserMultiFormatReader();
+  }
+
+  async function startScanner() {
+    try {
+      await initCodeReaderIfNeeded();
+      if (!codeReader) return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Tu navegador no permite usar la cámara desde la web.");
+        return;
+      }
+
+      cameraStatusText.textContent = "Buscando cámara…";
+
+      const devices = await codeReader.listVideoInputDevices();
+      if (!devices || !devices.length) {
+        alert("No se encontraron cámaras en este dispositivo.");
+        cameraStatusText.textContent = "Sin cámara";
+        return;
+      }
+
+      let deviceIdToUse = devices[0].deviceId;
+      const backCam = devices.find(d =>
+        (d.label || "").toLowerCase().includes("back")
+      );
+      if (backCam) deviceIdToUse = backCam.deviceId;
+      currentDeviceId = deviceIdToUse;
+
+      const deviceLabel =
+        (devices.find(d => d.deviceId === deviceIdToUse)?.label || "Cámara");
+      cameraNameEl.textContent =
+        deviceLabel.length > 30 ? deviceLabel.slice(0, 30) + "…" : deviceLabel;
+
+      scannerContainer.style.display = "flex";
+      btnStartScan.disabled = true;
+      btnStopScan.style.display = "inline-flex";
+      cameraStatusText.textContent = "Escaneando…";
+      scanning = true;
+
+      lastCodeEl.textContent = "–";
+
+      await codeReader.decodeFromVideoDevice(
+        deviceIdToUse,
+        videoElement,
+        (result, err) => {
+          if (!scanning) return;
+          if (result) {
+            const value = result.text;
+            lastCodeEl.textContent = value;
+            handleScannedCode(value);
+          }
+        }
+      );
+    } catch (err) {
+      console.error("Error al iniciar el escáner", err);
+      alert("No se pudo iniciar la cámara. Revisá permisos o probá otro navegador.");
+      stopScanner();
+    }
+  }
+
+  function stopScanner() {
+    scanning = false;
+
+    if (codeReader) {
+      try { codeReader.reset(); } catch (e) { console.warn(e); }
+    }
+
+    if (videoElement && videoElement.srcObject) {
+      try {
+        const tracks = videoElement.srcObject.getTracks();
+        tracks.forEach(t => t.stop());
+      } catch (e) {
+        console.warn("Error parando tracks de video", e);
+      }
+      videoElement.srcObject = null;
+    }
+
+    scannerContainer.style.display = "none";
+    btnStartScan.disabled = false;
+    btnStopScan.style.display = "none";
+    cameraStatusText.textContent = "Cámara lista";
+  }
+
+  function handleScannedCode(code) {
+    if (!code) return;
+
+    // Alta de producto (una sola vez)
+    const prod = ensureProductForCode(code);
+    if (!prod) return;
+
+    const { last } = getLastPrices(prod.id);
+    const lastPriceVal = last ? last.price : null;
+
+    const msg = lastPriceVal != null
+      ? `Producto: ${prod.name}\nCódigo: ${prod.code}\n\nIngresá el precio actual (último: $${formatMoney(lastPriceVal)}):`
+      : `Producto: ${prod.name}\nCódigo: ${prod.code}\n\nIngresá el precio actual:`;
+
+    const priceInput = prompt(
+      msg,
+      lastPriceVal != null ? String(lastPriceVal).replace(".", ",") : ""
+    );
+    const priceValue = parsePriceInput(priceInput, lastPriceVal);
+
+    if (priceValue == null) {
+      alert("Precio inválido o cancelado. No se registró la compra.");
+      return;
+    }
+
+    addPriceRecord(prod.id, priceValue);
+    addToCurrentList(prod.id, priceValue);
+    renderReport();
+    showToast("✅ Compra registrada");
+  }
+
+  // ---------------------------
+  // Eventos
+  // ---------------------------
+  btnStartScan.addEventListener("click", startScanner);
+  btnStopScan.addEventListener("click", stopScanner);
+  btnClearList.addEventListener("click", clearCurrentList);
+  btnClosePurchase.addEventListener("click", closeCurrentPurchase);
+
+  storeNameInput.addEventListener("input", () => {
+    currentStore = storeNameInput.value;
+    saveState();
+  });
+
+  itemsListEl.addEventListener("click", (e) => {
+    const target = e.target;
+    const li = target.closest(".item");
+    if (!li) return;
+    const productId = li.dataset.pid;
+    if (!productId) return;
+
+    const action = target.dataset.action;
+    const idx = currentList.findIndex(i => i.productId === productId);
+    if (idx === -1) return;
+
+    const item = currentList[idx];
+    const prod = products.find(p => p.id === productId);
+
+    if (action === "edit") {
+      const newQtyStr = prompt(
+        `Editar cantidad para ${prod ? prod.name : "producto"}:`,
+        String(item.qty)
+      );
+      if (newQtyStr === null) return;
+      const newQty = Number(newQtyStr);
+      if (!newQty || newQty <= 0) {
+        alert("Cantidad inválida.");
+        return;
+      }
+
+      const newPriceStr = prompt(
+        `Editar precio unitario para ${prod ? prod.name : "producto"}:`,
+        String(item.price).replace(".", ",")
+      );
+      const newPriceVal = parsePriceInput(newPriceStr, item.price);
+      if (newPriceVal == null) {
+        alert("Precio inválido.");
+        return;
+      }
+
+      // si cambió el precio, lo registramos en historial también
+      if (newPriceVal !== item.price) {
+        addPriceRecord(productId, newPriceVal);
+        renderReport();
+      }
+
+      item.qty = newQty;
+      item.price = newPriceVal;
+      saveState();
+      renderList();
+    } else if (action === "delete") {
+      const ok = confirm("¿Quitar este producto de la lista actual?");
+      if (!ok) return;
+      currentList.splice(idx, 1);
+      saveState();
+      renderList();
+    }
+  });
+
+  chartProductSelect.addEventListener("change", () => {
+    chartSelectedProductId = chartProductSelect.value;
+    drawPriceChart(chartSelectedProductId);
+  });
+
+  window.addEventListener("beforeunload", stopScanner);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopScanner();
+  });
+
+  // ---------------------------
+  // Init
+  // ---------------------------
+  loadState();
+</script>
 </body>
 </html>
