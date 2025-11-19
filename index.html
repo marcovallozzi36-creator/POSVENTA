@@ -1062,7 +1062,7 @@
       btnEdit.dataset.action = "edit-product";
 
       const btnDelete = document.createElement("button");
-      btnDelete.className = "btn btn-danger btn-sm";
+      btnDelete.className = "btn btn-danger.btn-sm".replace("."," ");
       btnDelete.textContent = "🗑️";
       btnDelete.dataset.action = "delete-product";
 
@@ -1191,7 +1191,7 @@
       actions.className = "item-actions";
 
       const btnEdit = document.createElement("button");
-      btnEdit.className = "btn.btn-secondary btn-sm".replace(".", " ");
+      btnEdit.className = "btn btn-secondary btn-sm";
       btnEdit.textContent = "✏️";
       btnEdit.title = "Editar cantidad / precio";
       btnEdit.dataset.action = "edit";
@@ -1474,27 +1474,45 @@
     cameraNameEl.textContent = label.length > 30 ? label.slice(0, 30) + "…" : label;
   }
 
-  // ✅ leer solo 1 código por vez
+  // ✅ leer solo 1 código por vez, pidiendo buena resolución
   function startDecoding() {
-    if (!codeReader || !videoDevices.length) return;
+    if (!codeReader) return;
 
     scanning = true;
     lastCodeEl.textContent = "–";
     updateCameraLabel();
     cameraStatusText.textContent = "Escaneando…";
 
-    codeReader.decodeFromVideoDevice(
-      videoDevices[currentDeviceIndex].deviceId,
+    const hasDevices = videoDevices && videoDevices.length > 0;
+
+    const constraints = {
+      video: hasDevices
+        ? {
+            deviceId: { exact: videoDevices[currentDeviceIndex].deviceId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        : {
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+    };
+
+    codeReader.decodeFromConstraints(
+      constraints,
       videoElement,
-      (result) => {
+      (result, err) => {
         if (!scanning) return;
+
         if (result) {
           scanning = false;
           const value = result.text;
           lastCodeEl.textContent = value;
-          stopScanner();          // corta cámara
-          handleScannedCode(value); // procesa UNA vez
+          stopScanner();
+          handleScannedCode(value);
         }
+        // errores por frame se ignoran; ZXing sigue intentando
       }
     );
   }
@@ -1514,9 +1532,9 @@
       if (!videoDevices.length) {
         await loadVideoDevices();
       }
-      if (!videoDevices.length) return;
 
-      btnSwitchCamera.style.display = videoDevices.length > 1 ? "inline-flex" : "none";
+      btnSwitchCamera.style.display =
+        videoDevices && videoDevices.length > 1 ? "inline-flex" : "none";
 
       scannerContainer.style.display = "flex";
       btnStartScan.disabled = true;
@@ -1557,7 +1575,7 @@
     if (!videoDevices.length) {
       await loadVideoDevices();
     }
-    if (videoDevices.length < 2) {
+    if (!videoDevices.length || videoDevices.length < 2) {
       alert("No hay más de una cámara disponible.");
       return;
     }
@@ -1565,6 +1583,9 @@
     currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
 
     if (!codeReader) return;
+
+    // Reseteamos el lector y re-iniciamos con la nueva cámara
+    try { codeReader.reset(); } catch (e) { console.warn(e); }
 
     if (videoElement && videoElement.srcObject) {
       try {
