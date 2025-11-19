@@ -399,6 +399,11 @@
       min-width: 26px;
     }
 
+    .item-checked .item-name {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
     .footer-row {
       margin-top: 4px;
       display: flex;
@@ -624,7 +629,7 @@
   <header>
     <div class="title-block">
       <h1><span>🛒</span> Lista Súper + Precios</h1>
-      <p>Escaneá, cargá precios y compará cada compra.</p>
+      <p>Armá la lista en casa, escaneá en el súper y compará precios.</p>
     </div>
     <div class="pill">
       <div class="pill-dot"></div>
@@ -673,14 +678,14 @@
     <section class="card">
       <div class="card-header">
         <h2>📦 Productos</h2>
-        <small>Alta de productos (código + nombre).</small>
+        <small>Alta de productos (código opcional + nombre).</small>
       </div>
 
       <div class="field-row">
         <input
           type="text"
           id="product-code-input"
-          placeholder="Código de barras"
+          placeholder="Código de barras (si lo tenés)"
           autocomplete="off"
         />
       </div>
@@ -722,7 +727,7 @@
 
       <div class="list-container">
         <div id="empty-state" class="list-empty">
-          Todavía no agregaste nada. Empezá escaneando en el súper.
+          Armá la lista desde “Productos” o escaneando en el súper.
         </div>
         <ul class="items" id="items-list"></ul>
       </div>
@@ -785,12 +790,12 @@
   // ---------------------------
   const PRODUCTS_KEY  = "ls_super_products_v1";
   const HISTORY_KEY   = "ls_super_price_history_v1";
-  const LIST_KEY      = "ls_super_current_list_v2";
+  const LIST_KEY      = "ls_super_current_list_v3";
   const PURCHASES_KEY = "ls_super_purchases_v1";
 
   let products      = [];
   let priceHistory  = [];
-  let currentList   = [];
+  let currentList   = []; // {productId, qty, price, checked}
   let currentStore  = "";
   let purchases     = [];
 
@@ -869,10 +874,22 @@
       if (l) {
         const parsed = JSON.parse(l);
         if (Array.isArray(parsed)) {
-          currentList = parsed;
+          // Versión muy vieja: solo lista
+          currentList = parsed.map(it => ({
+            productId: it.productId,
+            qty: it.qty,
+            price: it.price,
+            checked: false
+          }));
           currentStore = "";
         } else {
-          currentList = parsed.items || [];
+          const items = parsed.items || [];
+          currentList = items.map(it => ({
+            productId: it.productId,
+            qty: it.qty,
+            price: it.price,
+            checked: !!it.checked
+          }));
           currentStore = parsed.storeName || "";
         }
       } else {
@@ -902,6 +919,7 @@
   }
 
   function findProductByCode(code) {
+    if (!code) return undefined;
     return products.find(p => p.code === code);
   }
 
@@ -958,16 +976,19 @@
     saveState();
   }
 
-  function addToCurrentList(productId, price) {
+  // markChecked = true cuando viene del escaneo
+  function addToCurrentList(productId, price, markChecked = false) {
     const existing = currentList.find(i => i.productId === productId);
     if (existing) {
       existing.qty += 1;
       existing.price = price;
+      if (markChecked) existing.checked = true;
     } else {
       currentList.push({
         productId,
         qty: 1,
-        price
+        price,
+        checked: !!markChecked
       });
     }
     saveState();
@@ -1056,16 +1077,23 @@
       const actions = document.createElement("div");
       actions.className = "product-actions";
 
+      const btnAdd = document.createElement("button");
+      btnAdd.className = "btn btn-secondary btn-sm";
+      btnAdd.textContent = "➕";
+      btnAdd.title = "Agregar a la lista";
+      btnAdd.dataset.action = "add-to-list";
+
       const btnEdit = document.createElement("button");
       btnEdit.className = "btn btn-secondary btn-sm";
       btnEdit.textContent = "✏️";
       btnEdit.dataset.action = "edit-product";
 
       const btnDelete = document.createElement("button");
-      btnDelete.className = "btn btn-danger.btn-sm".replace("."," ");
+      btnDelete.className = "btn btn-danger btn-sm";
       btnDelete.textContent = "🗑️";
       btnDelete.dataset.action = "delete-product";
 
+      actions.appendChild(btnAdd);
       actions.appendChild(btnEdit);
       actions.appendChild(btnDelete);
 
@@ -1079,19 +1107,19 @@
     const code = productCodeInput.value.trim();
     const name = productNameInput.value.trim();
 
-    if (!code) {
-      alert("Ingresá al menos el código del producto.");
+    if (!name && !code) {
+      alert("Ingresá al menos un nombre o un código.");
       return;
     }
 
-    let prod = findProductByCode(code);
+    let prod = code ? findProductByCode(code) : null;
     if (prod) {
       prod.name = name || prod.name || "Producto sin nombre";
       showToast("✏️ Producto actualizado");
     } else {
       prod = {
         id: createId(),
-        code,
+        code: code || "",
         name: name || "Producto sin nombre"
       };
       products.push(prod);
@@ -1103,6 +1131,15 @@
     saveState();
     renderProducts();
     renderReport();
+  }
+
+  function addProductToList(productId) {
+    const prod = products.find(p => p.id === productId);
+    if (!prod) return;
+    const { last } = getLastPrices(productId);
+    const defaultPrice = last ? last.price : 0;
+    addToCurrentList(productId, defaultPrice, false);
+    showToast("🧺 Agregado a la lista");
   }
 
   function deleteProduct(productId) {
@@ -1151,6 +1188,7 @@
       const li = document.createElement("li");
       li.className = "item";
       li.dataset.pid = item.productId;
+      if (item.checked) li.classList.add("item-checked");
 
       const main = document.createElement("div");
       main.className = "item-main";
@@ -1190,6 +1228,12 @@
       const actions = document.createElement("div");
       actions.className = "item-actions";
 
+      const btnCheck = document.createElement("button");
+      btnCheck.className = "btn btn-secondary btn-sm";
+      btnCheck.textContent = item.checked ? "✅" : "⭕";
+      btnCheck.title = item.checked ? "Marcar como pendiente" : "Marcar como comprado";
+      btnCheck.dataset.action = "toggle-check";
+
       const btnEdit = document.createElement("button");
       btnEdit.className = "btn btn-secondary btn-sm";
       btnEdit.textContent = "✏️";
@@ -1202,6 +1246,7 @@
       btnDelete.title = "Quitar de la lista";
       btnDelete.dataset.action = "delete";
 
+      actions.appendChild(btnCheck);
       actions.appendChild(btnEdit);
       actions.appendChild(btnDelete);
 
@@ -1584,7 +1629,6 @@
 
     if (!codeReader) return;
 
-    // Reseteamos el lector y re-iniciamos con la nueva cámara
     try { codeReader.reset(); } catch (e) { console.warn(e); }
 
     if (videoElement && videoElement.srcObject) {
@@ -1657,7 +1701,8 @@
     }
 
     addPriceRecord(prod.id, priceValue);
-    addToCurrentList(prod.id, priceValue);
+    // ✅ si ya estaba en la lista (armada en casa), se actualiza y se marca comprado
+    addToCurrentList(prod.id, priceValue, true);
     renderReport();
     showToast("✅ Compra registrada");
   }
@@ -1689,24 +1734,24 @@
     const prod = products.find(p => p.id === productId);
     if (!prod) return;
 
-    if (action === "edit-product") {
+    if (action === "add-to-list") {
+      addProductToList(productId);
+    } else if (action === "edit-product") {
       const newCode = prompt(
-        "Editar código de barras:",
+        "Editar código de barras (puede quedar vacío):",
         prod.code || ""
       );
       if (newCode === null) return;
       const trimmedCode = newCode.trim();
-      if (!trimmedCode) {
-        alert("El código no puede quedar vacío.");
-        return;
-      }
 
-      const dup = products.find(
-        p => p.code === trimmedCode && p.id !== productId
-      );
-      if (dup) {
-        alert("Ya existe otro producto con ese código.");
-        return;
+      if (trimmedCode) {
+        const dup = products.find(
+          p => p.code === trimmedCode && p.id !== productId
+        );
+        if (dup) {
+          alert("Ya existe otro producto con ese código.");
+          return;
+        }
       }
 
       const newName = prompt(
@@ -1740,7 +1785,11 @@
     const item = currentList[idx];
     const prod = products.find(p => p.id === productId);
 
-    if (action === "edit") {
+    if (action === "toggle-check") {
+      item.checked = !item.checked;
+      saveState();
+      renderList();
+    } else if (action === "edit") {
       const newQtyStr = prompt(
         `Editar cantidad para ${prod ? prod.name : "producto"}:`,
         String(item.qty)
