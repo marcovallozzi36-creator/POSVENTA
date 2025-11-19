@@ -547,13 +547,55 @@
       box-shadow: 0 12px 30px rgba(22, 163, 74, 0.8);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.15s ease, transform 0.15s ease;
+      transition: opacity 0.15s.ease, transform 0.15s.ease;
       z-index: 9999;
     }
 
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Productos */
+    .products-list {
+      max-height: 26vh;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-top: 4px;
+    }
+
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      font-size: 0.78rem;
+      background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
+    }
+
+    .product-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .product-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-code {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .product-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     @media (max-width: 380px) {
@@ -606,6 +648,38 @@
           <span>Último: <strong id="last-code">–</strong></span>
         </div>
       </div>
+    </section>
+
+    <!-- MÓDULO DE PRODUCTOS -->
+    <section class="card">
+      <div class="card-header">
+        <h2>📦 Productos</h2>
+        <small>Alta de productos (código + nombre).</small>
+      </div>
+
+      <div class="field-row">
+        <input
+          type="text"
+          id="product-code-input"
+          placeholder="Código de barras"
+          autocomplete="off"
+        />
+      </div>
+      <div class="field-row">
+        <input
+          type="text"
+          id="product-name-input"
+          placeholder="Nombre del producto"
+          autocomplete="off"
+        />
+        <button class="btn btn-secondary btn-sm" id="btn-save-product">
+          💾 Guardar
+        </button>
+      </div>
+      <div class="list-empty" id="products-empty">
+        No hay productos cargados. Podés darlos de alta acá o al escanear uno nuevo.
+      </div>
+      <div class="products-list" id="products-list"></div>
     </section>
 
     <!-- LISTA ACTUAL -->
@@ -692,7 +766,7 @@
   // ---------------------------
   const PRODUCTS_KEY  = "ls_super_products_v1";
   const HISTORY_KEY   = "ls_super_price_history_v1";
-  const LIST_KEY      = "ls_super_current_list_v2"; // ahora guarda {storeName, items}
+  const LIST_KEY      = "ls_super_current_list_v2";
   const PURCHASES_KEY = "ls_super_purchases_v1";
 
   let products      = []; // {id, code, name}
@@ -734,6 +808,13 @@
 
   const toastEl            = document.getElementById("toast");
 
+  // Productos
+  const productCodeInput   = document.getElementById("product-code-input");
+  const productNameInput   = document.getElementById("product-name-input");
+  const btnSaveProduct     = document.getElementById("btn-save-product");
+  const productsListEl     = document.getElementById("products-list");
+  const productsEmptyEl    = document.getElementById("products-empty");
+
   let chartSelectedProductId = "";
 
   // ---------------------------
@@ -768,7 +849,6 @@
       if (l) {
         const parsed = JSON.parse(l);
         if (Array.isArray(parsed)) {
-          // versión vieja -> sólo items
           currentList = parsed;
           currentStore = "";
         } else {
@@ -791,6 +871,7 @@
     }
 
     storeNameInput.value = currentStore;
+    renderProducts();
     renderList();
     renderReport();
     renderPurchases();
@@ -802,26 +883,6 @@
 
   function findProductByCode(code) {
     return products.find(p => p.code === code);
-  }
-
-  function ensureProductForCode(code) {
-    let prod = findProductByCode(code);
-    if (prod) return prod;
-
-    const name = prompt(
-      "Nuevo producto detectado.\n\nCódigo: " + code + "\n\nNombre del producto:"
-    );
-    if (name === null) return null; // canceló
-
-    const cleanName = (name || "").trim() || "Producto sin nombre";
-    prod = {
-      id: createId(),
-      code,
-      name: cleanName
-    };
-    products.push(prod);
-    saveState();
-    return prod;
   }
 
   function parsePriceInput(input, lastPrice) {
@@ -881,7 +942,7 @@
     const existing = currentList.find(i => i.productId === productId);
     if (existing) {
       existing.qty += 1;
-      existing.price = price; // último precio
+      existing.price = price;
     } else {
       currentList.push({
         productId,
@@ -912,7 +973,6 @@
 
     const total = currentList.reduce((acc, item) => acc + item.qty * item.price, 0);
     const itemsCount = currentList.reduce((acc, item) => acc + item.qty, 0);
-
     const storeName = currentStore.trim() || "Sin nombre";
 
     const ok = confirm(
@@ -930,7 +990,6 @@
 
     purchases.push(purchase);
 
-    // Limpiamos lista actual pero NO tocamos historial de precios
     currentList = [];
     currentStore = "";
     storeNameInput.value = "";
@@ -938,6 +997,113 @@
     renderList();
     renderPurchases();
     showToast("🧾 Compra cerrada");
+  }
+
+  // ---------------------------
+  // Render Productos
+  // ---------------------------
+  function renderProducts() {
+    productsListEl.innerHTML = "";
+    if (!products.length) {
+      productsEmptyEl.style.display = "flex";
+    } else {
+      productsEmptyEl.style.display = "none";
+    }
+
+    const sorted = [...products].sort((a, b) =>
+      a.name.localeCompare(b.name, "es")
+    );
+
+    sorted.forEach(prod => {
+      const div = document.createElement("div");
+      div.className = "product-item";
+      div.dataset.pid = prod.id;
+
+      const main = document.createElement("div");
+      main.className = "product-main";
+
+      const nameSpan = document.createElement("div");
+      nameSpan.className = "product-name";
+      nameSpan.textContent = prod.name;
+
+      const codeSpan = document.createElement("div");
+      codeSpan.className = "product-code";
+      codeSpan.textContent = prod.code || "Sin código";
+
+      main.appendChild(nameSpan);
+      main.appendChild(codeSpan);
+
+      const actions = document.createElement("div");
+      actions.className = "product-actions";
+
+      const btnEdit = document.createElement("button");
+      btnEdit.className = "btn btn-secondary btn-sm";
+      btnEdit.textContent = "✏️";
+      btnEdit.dataset.action = "edit-product";
+
+      const btnDelete = document.createElement("button");
+      btnDelete.className = "btn btn-danger btn-sm";
+      btnDelete.textContent = "🗑️";
+      btnDelete.dataset.action = "delete-product";
+
+      actions.appendChild(btnEdit);
+      actions.appendChild(btnDelete);
+
+      div.appendChild(main);
+      div.appendChild(actions);
+      productsListEl.appendChild(div);
+    });
+  }
+
+  function handleSaveProduct() {
+    const code = productCodeInput.value.trim();
+    const name = productNameInput.value.trim();
+
+    if (!code) {
+      alert("Ingresá al menos el código del producto.");
+      return;
+    }
+
+    let prod = findProductByCode(code);
+    if (prod) {
+      // Actualizar nombre
+      prod.name = name || prod.name || "Producto sin nombre";
+      showToast("✏️ Producto actualizado");
+    } else {
+      prod = {
+        id: createId(),
+        code,
+        name: name || "Producto sin nombre"
+      };
+      products.push(prod);
+      showToast("💾 Producto guardado");
+    }
+
+    productCodeInput.value = "";
+    productNameInput.value = "";
+    saveState();
+    renderProducts();
+    renderReport();
+  }
+
+  function deleteProduct(productId) {
+    const prod = products.find(p => p.id === productId);
+    const name = prod ? prod.name : "producto";
+    const ok = confirm(`¿Eliminar ${name}? Esto también quitará su historial y su presencia en la lista actual.`);
+    if (!ok) return;
+
+    products = products.filter(p => p.id !== productId);
+    priceHistory = priceHistory.filter(h => h.productId !== productId);
+    currentList = currentList.filter(i => i.productId !== productId);
+
+    if (chartSelectedProductId === productId) {
+      chartSelectedProductId = "";
+    }
+
+    saveState();
+    renderProducts();
+    renderList();
+    renderReport();
   }
 
   // ---------------------------
@@ -1006,13 +1172,13 @@
       actions.className = "item-actions";
 
       const btnEdit = document.createElement("button");
-      btnEdit.className = "btn btn-secondary btn-sm";
+      btnEdit.className = "btn.btn-secondary.btn-sm".replace(/\./g," ");
       btnEdit.textContent = "✏️";
       btnEdit.title = "Editar cantidad / precio";
       btnEdit.dataset.action = "edit";
 
       const btnDelete = document.createElement("button");
-      btnDelete.className = "btn btn-danger btn-sm";
+      btnDelete.className = "btn.btn-danger.btn-sm".replace(/\./g," ");
       btnDelete.textContent = "🗑️";
       btnDelete.title = "Quitar de la lista";
       btnDelete.dataset.action = "delete";
@@ -1050,7 +1216,6 @@
       a.name.localeCompare(b.name, "es")
     );
 
-    // Dropdown para gráfico
     prodsSorted.forEach(prod => {
       const history = getHistoryForProduct(prod.id);
       if (!history.length) return;
@@ -1060,7 +1225,6 @@
       chartProductSelect.appendChild(opt);
     });
 
-    // Mantener selección si es posible
     if (chartSelectedProductId) {
       const exists = Array.from(chartProductSelect.options).some(o => o.value === chartSelectedProductId);
       if (exists) {
@@ -1073,10 +1237,9 @@
       }
     }
 
-    // Lista de productos con último precio
     prodsSorted.forEach(prod => {
       const { last, prev } = getLastPrices(prod.id);
-      if (!last) return; // sin precios
+      if (!last) return;
 
       const div = document.createElement("div");
       div.className = "report-item";
@@ -1143,23 +1306,20 @@
 
     chartEmptyEl.textContent = "";
 
-    const width = priceChartCanvas.width;
-    const height = priceChartCanvas.height;
-
-    // Normalizar tamaños por si el device pixel ratio cambia
     const dpr = window.devicePixelRatio || 1;
+    const logicalHeight = 130;
     priceChartCanvas.width = priceChartCanvas.clientWidth * dpr;
-    priceChartCanvas.height = height * dpr;
+    priceChartCanvas.height = logicalHeight * dpr;
+    ctx.resetTransform();
     ctx.scale(dpr, dpr);
 
     const innerPadding = 10;
     const w = priceChartCanvas.clientWidth - innerPadding * 2;
-    const h = height - innerPadding * 2;
+    const h = logicalHeight - innerPadding * 2;
 
     const prices = history.map(h => h.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
-
     const range = maxPrice - minPrice || 1;
 
     function xForIndex(i) {
@@ -1172,7 +1332,6 @@
       return innerPadding + h - ratio * h;
     }
 
-    // Ejes simples
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(55,65,81,0.9)";
     ctx.beginPath();
@@ -1181,7 +1340,6 @@
     ctx.lineTo(innerPadding + w, innerPadding + h);
     ctx.stroke();
 
-    // Línea de precio
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#22c55e";
     ctx.beginPath();
@@ -1193,7 +1351,6 @@
     });
     ctx.stroke();
 
-    // Puntos
     ctx.fillStyle = "#22c55e";
     history.forEach((pt, i) => {
       const x = xForIndex(i);
@@ -1203,7 +1360,6 @@
       ctx.fill();
     });
 
-    // Texto min / max
     ctx.fillStyle = "#9ca3af";
     ctx.font = "10px system-ui";
     ctx.fillText(`Min: $${formatMoney(minPrice)}`, innerPadding + 2, innerPadding + 10);
@@ -1359,9 +1515,35 @@
   function handleScannedCode(code) {
     if (!code) return;
 
-    // Alta de producto (una sola vez)
-    const prod = ensureProductForCode(code);
-    if (!prod) return;
+    let prod = findProductByCode(code);
+
+    if (!prod) {
+      const add = confirm(
+        "Este código no está en la base de productos.\n\nCódigo: " +
+          code +
+          "\n\n¿Querés darlo de alta ahora?"
+      );
+      if (!add) {
+        alert("Primero tenés que darlo de alta en el módulo 'Productos'.");
+        return;
+      }
+
+      const name = prompt(
+        "Nombre del producto para el código:\n" + code
+      );
+      if (name === null) return;
+
+      const cleanName = (name || "").trim() || "Producto sin nombre";
+      prod = {
+        id: createId(),
+        code,
+        name: cleanName
+      };
+      products.push(prod);
+      saveState();
+      renderProducts();
+      renderReport();
+    }
 
     const { last } = getLastPrices(prod.id);
     const lastPriceVal = last ? last.price : null;
@@ -1400,6 +1582,58 @@
     saveState();
   });
 
+  // Productos: alta / edición / baja
+  btnSaveProduct.addEventListener("click", handleSaveProduct);
+
+  productsListEl.addEventListener("click", (e) => {
+    const target = e.target;
+    const wrapper = target.closest(".product-item");
+    if (!wrapper) return;
+    const productId = wrapper.dataset.pid;
+    if (!productId) return;
+
+    const action = target.dataset.action;
+    const prod = products.find(p => p.id === productId);
+    if (!prod) return;
+
+    if (action === "edit-product") {
+      const newCode = prompt(
+        "Editar código de barras:",
+        prod.code || ""
+      );
+      if (newCode === null) return;
+      const trimmedCode = newCode.trim();
+      if (!trimmedCode) {
+        alert("El código no puede quedar vacío.");
+        return;
+      }
+
+      const dup = products.find(
+        p => p.code === trimmedCode && p.id !== productId
+      );
+      if (dup) {
+        alert("Ya existe otro producto con ese código.");
+        return;
+      }
+
+      const newName = prompt(
+        "Editar nombre del producto:",
+        prod.name || ""
+      );
+      if (newName === null) return;
+
+      prod.code = trimmedCode;
+      prod.name = (newName || "").trim() || "Producto sin nombre";
+
+      saveState();
+      renderProducts();
+      renderReport();
+    } else if (action === "delete-product") {
+      deleteProduct(productId);
+    }
+  });
+
+  // Lista actual editar / borrar ítem
   itemsListEl.addEventListener("click", (e) => {
     const target = e.target;
     const li = target.closest(".item");
@@ -1436,7 +1670,6 @@
         return;
       }
 
-      // si cambió el precio, lo registramos en historial también
       if (newPriceVal !== item.price) {
         addPriceRecord(productId, newPriceVal);
         renderReport();
