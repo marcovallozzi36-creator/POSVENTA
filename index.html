@@ -341,7 +341,7 @@
       gap: 8px;
       padding: 7px 9px;
       border-radius: 12px;
-      background: radial-gradient(circle at top.left, #0b1120 0, #020617 45%, #020617 100%);
+      background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
       border: 1px solid rgba(31, 41, 55, 0.95);
       font-size: 0.8rem;
     }
@@ -547,7 +547,7 @@
       box-shadow: 0 12px 30px rgba(22, 163, 74, 0.8);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.15s ease, transform 0.15s ease;
+      transition: opacity 0.15s ease, transform 0.15s.ease;
       z-index: 9999;
     }
 
@@ -572,7 +572,7 @@
       border-radius: 10px;
       border: 1px solid rgba(31, 41, 55, 0.9);
       font-size: 0.78rem;
-      background: radial-gradient(circle at top.left, #0b1120 0, #020617 45%, #020617 100%);
+      background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
     }
 
     .product-main {
@@ -633,7 +633,7 @@
         <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="display:none;">
           ⏹️ Detener
         </button>
-        <button class="btn btn-secondary btn-sm" id="btn-switch-camera" style="display:none;">
+        <button class="btn btn-secondary.btn-sm".replace id="btn-switch-camera" style="display:none;">
           🔁 Cambiar cámara
         </button>
       </div>
@@ -1446,7 +1446,6 @@
       return;
     }
 
-    // Elegir cámara trasera si se puede
     let backIndex = videoDevices.findIndex(d =>
       (d.label || "").toLowerCase().includes("back") ||
       (d.label || "").toLowerCase().includes("environment")
@@ -1459,6 +1458,31 @@
     const dev = videoDevices[currentDeviceIndex];
     const label = dev.label || `Cámara ${currentDeviceIndex + 1}`;
     cameraNameEl.textContent = label.length > 30 ? label.slice(0, 30) + "…" : label;
+  }
+
+  // ✅ leer solo 1 código por vez
+  function startDecoding() {
+    if (!codeReader || !videoDevices.length) return;
+
+    scanning = true;
+    lastCodeEl.textContent = "–";
+    updateCameraLabel();
+    cameraStatusText.textContent = "Escaneando…";
+
+    codeReader.decodeFromVideoDevice(
+      videoDevices[currentDeviceIndex].deviceId,
+      videoElement,
+      (result) => {
+        if (!scanning) return;
+        if (result) {
+          scanning = false;
+          const value = result.text;
+          lastCodeEl.textContent = value;
+          stopScanner();          // corta cámara
+          handleScannedCode(value); // procesa UNA vez
+        }
+      }
+    );
   }
 
   async function startScanner() {
@@ -1483,24 +1507,8 @@
       scannerContainer.style.display = "flex";
       btnStartScan.disabled = true;
       btnStopScan.style.display = "inline-flex";
-      cameraStatusText.textContent = "Escaneando…";
-      scanning = true;
 
-      lastCodeEl.textContent = "–";
-      updateCameraLabel();
-
-      await codeReader.decodeFromVideoDevice(
-        videoDevices[currentDeviceIndex].deviceId,
-        videoElement,
-        (result) => {
-          if (!scanning) return;
-          if (result) {
-            const value = result.text;
-            lastCodeEl.textContent = value;
-            handleScannedCode(value);
-          }
-        }
-      );
+      startDecoding();
     } catch (err) {
       console.error("Error al iniciar el escáner", err);
       alert("No se pudo iniciar la cámara. Revisá permisos o probá otro navegador.");
@@ -1541,27 +1549,20 @@
     }
 
     currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+
     if (!codeReader) return;
 
-    scanning = true;
-    updateCameraLabel();
-
-    try {
-      await codeReader.decodeFromVideoDevice(
-        videoDevices[currentDeviceIndex].deviceId,
-        videoElement,
-        (result) => {
-          if (!scanning) return;
-          if (result) {
-            const value = result.text;
-            lastCodeEl.textContent = value;
-            handleScannedCode(value);
-          }
-        }
-      );
-    } catch (e) {
-      console.error("Error cambiando cámara", e);
+    if (videoElement && videoElement.srcObject) {
+      try {
+        const tracks = videoElement.srcObject.getTracks();
+        tracks.forEach(t => t.stop());
+      } catch (e) {
+        console.warn("Error parando tracks de video", e);
+      }
+      videoElement.srcObject = null;
     }
+
+    startDecoding();
   }
 
   // ---------------------------
@@ -1599,11 +1600,9 @@
       renderProducts();
       renderReport();
       showToast("📦 Producto dado de alta");
-      // IMPORTANTE: acá cortamos, NO pedimos precio, NO lo agregamos a la lista
-      return;
+      return; // no compra, sólo alta
     }
 
-    // Si ya existe, ahora sí comportamiento de compra
     const { last } = getLastPrices(prod.id);
     const lastPriceVal = last ? last.price : null;
 
