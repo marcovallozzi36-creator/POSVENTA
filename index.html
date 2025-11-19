@@ -11,12 +11,10 @@
   <style>
     :root {
       --bg: #f3f4f6;
-      --bg-soft: #ffffff;
       --card: #ffffff;
       --accent: #16a34a;
       --accent-soft: #22c55e;
       --danger: #ef4444;
-      --warn: #f97316;
       --text: #111827;
       --muted: #6b7280;
       --border: #e5e7eb;
@@ -107,12 +105,61 @@
       box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
     }
 
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 999px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      border-radius: 999px;
+      padding: 6px 4px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tab-btn span.icon {
+      font-size: 1.1rem;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #052e16;
+      font-weight: 600;
+      box-shadow: 0 8px 18px rgba(22, 163, 74, 0.35);
+    }
+
     main {
       display: flex;
       flex-direction: column;
       gap: 8px;
       flex: 1;
       min-height: 0;
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .tab-content.active {
+      display: flex;
     }
 
     .card {
@@ -197,6 +244,180 @@
       box-shadow: none;
     }
 
+    .field-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      flex: 1;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.55);
+      background: #ffffff;
+    }
+
+    .list-empty {
+      font-size: 0.76rem;
+      color: var(--muted);
+      padding: 4px 2px 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Productos */
+    .products-list {
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-top: 4px;
+    }
+
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 7px;
+      border-radius: 9px;
+      border: 1px solid #e2e8f0;
+      font-size: 0.76rem;
+      background: #f9fafb;
+    }
+
+    .product-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .product-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-code {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .product-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    /* Lista */
+    .list-container {
+      max-height: 32vh;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-top: 4px;
+    }
+
+    ul.items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 7px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      font-size: 0.78rem;
+    }
+
+    .item-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-code {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .item-bottom {
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #cbd5f5;
+      background: #e0f2fe;
+      font-size: 0.7rem;
+      color: #0369a1;
+      white-space: nowrap;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .item-actions button {
+      min-width: 26px;
+    }
+
+    .item-checked .item-name {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .footer-row {
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .footer-row strong {
+      color: var(--accent);
+    }
+
+    /* Scanner */
     .scanner-container {
       margin-top: 6px;
       border-radius: 12px;
@@ -288,138 +509,9 @@
       color: var(--accent);
     }
 
-    .field-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    input[type="text"],
-    input[type="number"] {
-      flex: 1;
-      padding: 7px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f9fafb;
-      color: var(--text);
-      font-size: 0.8rem;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: #9ca3af;
-    }
-
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.55);
-      background: #ffffff;
-    }
-
-    .list-container {
-      max-height: 32vh;
-      overflow-y: auto;
-      padding-right: 2px;
-      margin-top: 4px;
-    }
-
-    .list-empty {
-      font-size: 0.76rem;
-      color: var(--muted);
-      padding: 4px 2px 2px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    ul.items {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 7px;
-      border-radius: 10px;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      font-size: 0.78rem;
-    }
-
-    .item-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .item-name {
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-code {
-      font-size: 0.68rem;
-      color: var(--muted);
-    }
-
-    .item-bottom {
-      margin-top: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .badge {
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid #cbd5f5;
-      background: #e0f2fe;
-      font-size: 0.7rem;
-      color: #0369a1;
-      white-space: nowrap;
-    }
-
-    .item-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .item-actions button {
-      min-width: 26px;
-    }
-
-    .item-checked .item-name {
-      text-decoration: line-through;
-      color: var(--muted);
-    }
-
-    .footer-row {
-      margin-top: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
-    .footer-row strong {
-      color: var(--accent);
-    }
-
+    /* Reporte */
     .report-list {
-      max-height: 26vh;
+      max-height: 40vh;
       overflow-y: auto;
       padding-right: 2px;
       margin-top: 4px;
@@ -459,13 +551,8 @@
       gap: 6px;
     }
 
-    .delta-up {
-      color: #16a34a;
-    }
-
-    .delta-down {
-      color: #f97316;
-    }
+    .delta-up { color: #16a34a; }
+    .delta-down { color: #f97316; }
 
     .chart-wrapper {
       margin-bottom: 4px;
@@ -548,6 +635,7 @@
       gap: 6px;
     }
 
+    /* Toast */
     .toast {
       position: fixed;
       left: 50%;
@@ -573,53 +661,9 @@
       transform: translateX(-50%) translateY(-3px);
     }
 
-    /* Productos */
-    .products-list {
-      max-height: 22vh;
-      overflow-y: auto;
-      padding-right: 2px;
-      margin-top: 4px;
-    }
-
-    .product-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 7px;
-      border-radius: 9px;
-      border: 1px solid #e2e8f0;
-      font-size: 0.76rem;
-      background: #f9fafb;
-    }
-
-    .product-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .product-name {
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .product-code {
-      font-size: 0.68rem;
-      color: var(--muted);
-    }
-
-    .product-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
     @media (max-width: 380px) {
       header h1 { font-size: 0.95rem; }
       header p { font-size: 0.7rem; }
-      .card-header h2 { font-size: 0.85rem; }
-      .scanner-video-wrapper { max-height: 200px; }
       body { font-size: 14px; }
     }
   </style>
@@ -637,145 +681,167 @@
     </div>
   </header>
 
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="tab-products">
+      <span class="icon">📦</span><span>Productos</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-list">
+      <span class="icon">📝</span><span>Lista</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-scan">
+      <span class="icon">📷</span><span>Escanear</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-report">
+      <span class="icon">📊</span><span>Reporte</span>
+    </button>
+  </nav>
+
   <main>
-    <!-- SCAN CARD -->
-    <section class="card" id="scan-card">
-      <div class="card-header">
-        <h2>📷 Escanear producto</h2>
-        <small id="camera-status-text">Cámara lista</small>
-      </div>
+    <!-- TAB PRODUCTOS -->
+    <section id="tab-products" class="tab-content active">
+      <section class="card">
+        <div class="card-header">
+          <h2>📦 Productos</h2>
+          <small>Alta de productos (código opcional + nombre).</small>
+        </div>
 
-      <div class="field-row">
-        <button class="btn btn-primary" id="btn-start-scan">
-          📷 Escanear código
-        </button>
-        <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="display:none;">
-          ⏹️ Detener
-        </button>
-        <button class="btn btn-secondary btn-sm" id="btn-switch-camera" style="display:none;">
-          🔁 Cambiar cámara
-        </button>
-      </div>
-
-      <div class="scanner-container" id="scanner-container">
-        <div class="scanner-header">
-          <span><span class="dot-live"></span> Escaneando…</span>
-          <span id="camera-name">Cámara</span>
+        <div class="field-row">
+          <input
+            type="text"
+            id="product-code-input"
+            placeholder="Código de barras (si lo tenés)"
+            autocomplete="off"
+          />
         </div>
-        <div class="scanner-video-wrapper">
-          <video id="video" playsinline></video>
-          <div class="scan-overlay"></div>
-          <div class="scan-line"></div>
+        <div class="field-row">
+          <input
+            type="text"
+            id="product-name-input"
+            placeholder="Nombre del producto"
+            autocomplete="off"
+          />
+          <button class="btn btn-secondary btn-sm" id="btn-save-product">
+            💾 Guardar
+          </button>
         </div>
-        <div class="scanner-footer">
-          <span>Apuntá el código dentro del recuadro 👆</span>
-          <span>Último: <strong id="last-code">–</strong></span>
+        <div class="list-empty" id="products-empty">
+          No hay productos cargados. Podés darlos de alta acá o al escanear uno nuevo.
         </div>
-      </div>
+        <div class="products-list" id="products-list"></div>
+      </section>
     </section>
 
-    <!-- MÓDULO DE PRODUCTOS -->
-    <section class="card">
-      <div class="card-header">
-        <h2>📦 Productos</h2>
-        <small>Alta de productos (código opcional + nombre).</small>
-      </div>
+    <!-- TAB LISTA -->
+    <section id="tab-list" class="tab-content">
+      <section class="card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+        <div class="card-header">
+          <h2>🧺 Lista de la compra</h2>
+          <small id="summary-text">0 productos · $0</small>
+        </div>
 
-      <div class="field-row">
-        <input
-          type="text"
-          id="product-code-input"
-          placeholder="Código de barras (si lo tenés)"
-          autocomplete="off"
-        />
-      </div>
-      <div class="field-row">
-        <input
-          type="text"
-          id="product-name-input"
-          placeholder="Nombre del producto"
-          autocomplete="off"
-        />
-        <button class="btn btn-secondary btn-sm" id="btn-save-product">
-          💾 Guardar
-        </button>
-      </div>
-      <div class="list-empty" id="products-empty">
-        No hay productos cargados. Podés darlos de alta acá o al escanear uno nuevo.
-      </div>
-      <div class="products-list" id="products-list"></div>
+        <div class="field-row">
+          <input
+            type="text"
+            id="store-name"
+            placeholder="Nombre del súper / negocio"
+            autocomplete="off"
+          />
+          <button class="btn btn-secondary btn-sm" id="btn-close-purchase">
+            ✅ Cerrar compra
+          </button>
+        </div>
+
+        <div class="list-container">
+          <div id="empty-state" class="list-empty">
+            Armá la lista desde “Productos” (botón ➕) o escaneando en el súper.
+          </div>
+          <ul class="items" id="items-list"></ul>
+        </div>
+
+        <div class="footer-row">
+          <span id="total-text">Total estimado: $0</span>
+          <button class="btn btn-danger btn-sm" id="btn-clear-list">
+            🗑️ Limpiar lista
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>🧾 Historial de compras</h2>
+          <small>Últimos tickets cerrados.</small>
+        </div>
+        <div class="purchases-list" id="purchases-list">
+          <div class="list-empty" id="purchases-empty">
+            Todavía no cerraste ninguna compra.
+          </div>
+        </div>
+      </section>
     </section>
 
-    <!-- LISTA ACTUAL -->
-    <section class="card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
-      <div class="card-header">
-        <h2>🧺 Lista de la compra actual</h2>
-        <small id="summary-text">0 productos · $0</small>
-      </div>
-
-      <div class="field-row">
-        <input
-          type="text"
-          id="store-name"
-          placeholder="Nombre del súper / negocio"
-          autocomplete="off"
-        />
-        <button class="btn btn-secondary btn-sm" id="btn-close-purchase">
-          ✅ Cerrar compra
-        </button>
-      </div>
-
-      <div class="list-container">
-        <div id="empty-state" class="list-empty">
-          Armá la lista desde “Productos” o escaneando en el súper.
+    <!-- TAB ESCANEAR -->
+    <section id="tab-scan" class="tab-content">
+      <section class="card" id="scan-card">
+        <div class="card-header">
+          <h2>📷 Escanear producto</h2>
+          <small id="camera-status-text">Cámara lista</small>
         </div>
-        <ul class="items" id="items-list"></ul>
-      </div>
 
-      <div class="footer-row">
-        <span id="total-text">Total estimado: $0</span>
-        <button class="btn btn-danger btn-sm" id="btn-clear-list">
-          🗑️ Limpiar lista
-        </button>
-      </div>
+        <div class="field-row">
+          <button class="btn btn-primary" id="btn-start-scan">
+            📷 Escanear código
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="display:none;">
+            ⏹️ Detener
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-switch-camera" style="display:none;">
+            🔁 Cambiar cámara
+          </button>
+        </div>
+
+        <div class="scanner-container" id="scanner-container">
+          <div class="scanner-header">
+            <span><span class="dot-live"></span> Escaneando…</span>
+            <span id="camera-name">Cámara</span>
+          </div>
+          <div class="scanner-video-wrapper">
+            <video id="video" playsinline></video>
+            <div class="scan-overlay"></div>
+            <div class="scan-line"></div>
+          </div>
+          <div class="scanner-footer">
+            <span>Apuntá el código dentro del recuadro 👆</span>
+            <span>Último: <strong id="last-code">–</strong></span>
+          </div>
+        </div>
+      </section>
     </section>
 
-    <!-- REPORTE PRECIOS -->
-    <section class="card">
-      <div class="card-header">
-        <h2>📊 Reporte de precios</h2>
-        <small>Último precio por producto (vs compra anterior).</small>
-      </div>
-
-      <div class="chart-wrapper">
-        <div class="chart-header">
-          <span>📈 Evolución de precio:</span>
-          <select id="chart-product-select">
-            <option value="">Elegí un producto…</option>
-          </select>
+    <!-- TAB REPORTE -->
+    <section id="tab-report" class="tab-content">
+      <section class="card">
+        <div class="card-header">
+          <h2>📊 Reporte de precios</h2>
+          <small>Último precio por producto (vs compra anterior).</small>
         </div>
-        <canvas id="price-chart" height="130"></canvas>
-        <div id="chart-empty">Seleccioná un producto con historial para ver el gráfico.</div>
-      </div>
 
-      <div class="report-list" id="report-list">
-        <div class="list-empty" id="report-empty">
-          Aún no hay historial. Cuando escanees y cargues precios, se verá acá.
+        <div class="chart-wrapper">
+          <div class="chart-header">
+            <span>📈 Evolución de precio:</span>
+            <select id="chart-product-select">
+              <option value="">Elegí un producto…</option>
+            </select>
+          </div>
+          <canvas id="price-chart" height="130"></canvas>
+          <div id="chart-empty">Seleccioná un producto con historial para ver el gráfico.</div>
         </div>
-      </div>
-    </section>
 
-    <!-- HISTORIAL DE COMPRAS -->
-    <section class="card">
-      <div class="card-header">
-        <h2>🧾 Historial de compras</h2>
-        <small>Últimos tickets cerrados.</small>
-      </div>
-      <div class="purchases-list" id="purchases-list">
-        <div class="list-empty" id="purchases-empty">
-          Todavía no cerraste ninguna compra.
+        <div class="report-list" id="report-list">
+          <div class="list-empty" id="report-empty">
+            Aún no hay historial. Cuando escanees y cargues precios, se verá acá.
+          </div>
         </div>
-      </div>
+      </section>
     </section>
   </main>
 </div>
@@ -843,6 +909,34 @@
   let chartSelectedProductId = "";
 
   // ---------------------------
+  // Tabs
+  // ---------------------------
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      tabContents.forEach(tab => {
+        if (tab.id === target) {
+          tab.classList.add("active");
+        } else {
+          tab.classList.remove("active");
+        }
+      });
+
+      // Cuando salís del tab de escaneo, apagamos la cámara
+      if (target !== "tab-scan") {
+        stopScanner();
+      }
+    });
+  });
+
+  // ---------------------------
   // Helpers
   // ---------------------------
   function showToast(message) {
@@ -874,7 +968,6 @@
       if (l) {
         const parsed = JSON.parse(l);
         if (Array.isArray(parsed)) {
-          // Versión muy vieja: solo lista
           currentList = parsed.map(it => ({
             productId: it.productId,
             qty: it.qty,
@@ -894,7 +987,6 @@
         }
       } else {
         currentList = [];
-        currentStore = "";
       }
 
       purchases = pu ? JSON.parse(pu) : [];
@@ -903,8 +995,8 @@
       products = [];
       priceHistory = [];
       currentList = [];
-      currentStore = "";
       purchases = [];
+      currentStore = "";
     }
 
     storeNameInput.value = currentStore;
@@ -976,7 +1068,6 @@
     saveState();
   }
 
-  // markChecked = true cuando viene del escaneo
   function addToCurrentList(productId, price, markChecked = false) {
     const existing = currentList.find(i => i.productId === productId);
     if (existing) {
@@ -1372,13 +1463,15 @@
 
     const dpr = window.devicePixelRatio || 1;
     const logicalHeight = 130;
-    priceChartCanvas.width = priceChartCanvas.clientWidth * dpr;
+    const clientWidth = priceChartCanvas.clientWidth || 260;
+
+    priceChartCanvas.width = clientWidth * dpr;
     priceChartCanvas.height = logicalHeight * dpr;
     ctx.resetTransform();
     ctx.scale(dpr, dpr);
 
     const innerPadding = 10;
-    const w = priceChartCanvas.clientWidth - innerPadding * 2;
+    const w = clientWidth - innerPadding * 2;
     const h = logicalHeight - innerPadding * 2;
 
     const prices = history.map(h => h.price);
@@ -1519,7 +1612,6 @@
     cameraNameEl.textContent = label.length > 30 ? label.slice(0, 30) + "…" : label;
   }
 
-  // ✅ leer solo 1 código por vez, pidiendo buena resolución
   function startDecoding() {
     if (!codeReader) return;
 
@@ -1557,7 +1649,6 @@
           stopScanner();
           handleScannedCode(value);
         }
-        // errores por frame se ignoran; ZXing sigue intentando
       }
     );
   }
@@ -1645,7 +1736,7 @@
   }
 
   // ---------------------------
-  // Lógica escaneo (alta sola la primera vez)
+  // Lógica escaneo
   // ---------------------------
   function handleScannedCode(code) {
     if (!code) return;
@@ -1701,7 +1792,6 @@
     }
 
     addPriceRecord(prod.id, priceValue);
-    // ✅ si ya estaba en la lista (armada en casa), se actualiza y se marca comprado
     addToCurrentList(prod.id, priceValue, true);
     renderReport();
     showToast("✅ Compra registrada");
@@ -1846,3 +1936,4 @@
 </script>
 </body>
 </html>
+
