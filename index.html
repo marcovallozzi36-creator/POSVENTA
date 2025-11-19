@@ -1588,9 +1588,11 @@
     codeReader = new ZXing.BrowserMultiFormatReader();
   }
 
+  // 👉 Acá está el cambio para priorizar la cámara trasera
   async function loadVideoDevices() {
     if (!codeReader) await initCodeReaderIfNeeded();
     if (!codeReader) return;
+
     videoDevices = await codeReader.listVideoInputDevices();
     if (!videoDevices || !videoDevices.length) {
       alert("No se encontraron cámaras en este dispositivo.");
@@ -1598,11 +1600,18 @@
       return;
     }
 
+    // 1) Intentar encontrar "back" o "environment"
     let backIndex = videoDevices.findIndex(d =>
       (d.label || "").toLowerCase().includes("back") ||
       (d.label || "").toLowerCase().includes("environment")
     );
-    currentDeviceIndex = backIndex >= 0 ? backIndex : 0;
+
+    // 2) Si no hay labels claros, usamos SIEMPRE LA ÚLTIMA (la mayoría de las veces, cámara trasera)
+    if (backIndex >= 0) {
+      currentDeviceIndex = backIndex;
+    } else {
+      currentDeviceIndex = videoDevices.length - 1;
+    }
   }
 
   function updateCameraLabel() {
@@ -1936,4 +1945,3 @@
 </script>
 </body>
 </html>
-
