@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Bring Clone - Vallozzi Edition</title>
+  <title>Listas Vallozzi · Login Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -30,6 +30,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-height: 520px;
     }
 
     .app-header {
@@ -52,10 +53,11 @@
       border-radius: 999px;
     }
 
-    .list-selector {
-      display: flex;
-      gap: 8px;
-      align-items: center;
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
     }
 
     select, input, button {
@@ -82,6 +84,7 @@
       border: none;
       transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
       white-space: nowrap;
+      font-size: 0.85rem;
     }
 
     .btn:hover {
@@ -102,11 +105,20 @@
       box-shadow: none;
     }
 
-    .section-title {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
+    .btn-danger {
+      background: transparent;
+      color: #fca5a5;
+      border: 1px solid #b91c1c;
+    }
+
+    .btn-danger:hover {
+      background: #111827;
+    }
+
+    .list-selector {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .add-item {
@@ -140,7 +152,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 420px;
+      max-height: 360px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -253,6 +265,94 @@
       gap: 8px;
     }
 
+    /* LOGIN VIEW */
+
+    .login-view {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .login-card {
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #111827;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .login-subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: #020617;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      color: #e5e7eb;
+      margin-top: 4px;
+    }
+
+    .login-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .login-users {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .user-chip {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .user-chip:hover {
+      background: #111827;
+    }
+
+    .user-info {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #022c22;
+    }
+
     @media (max-width: 480px) {
       .app {
         height: 100vh;
@@ -263,162 +363,301 @@
 </head>
 <body>
   <div class="app">
-    <header class="app-header">
-      <div>
-        <div class="app-title">Listas Vallozzi</div>
-        <div class="badge">Bring style · localStorage</div>
-      </div>
-    </header>
+    <!-- LOGIN VIEW -->
+    <div id="loginView" class="login-view">
+      <div class="login-card">
+        <div>
+          <div class="login-title">Listas Vallozzi</div>
+          <div class="login-subtitle">Tu mini-Bring con usuarios separados 💚</div>
+        </div>
 
-    <!-- Selector de lista -->
-    <section>
-      <div class="section-title">Lista actual</div>
-      <div class="list-selector">
-        <select id="listSelect"></select>
-        <button class="btn" id="newListBtn">Nueva</button>
-        <button class="btn btn-outline" id="renameListBtn">Renombrar</button>
-      </div>
-    </section>
+        <div>
+          <label class="section-title" for="loginNameInput">Tu nombre / alias</label>
+          <input
+            id="loginNameInput"
+            class="login-input"
+            type="text"
+            placeholder="Ej: Vallozzi, Salva, Cocina, Compras..."
+          />
+          <div class="login-hint">
+            Esto no es un login seguro, es más bien para separar las listas por persona / sector 😉
+          </div>
+        </div>
 
-    <!-- Agregar ítems -->
-    <section class="add-item">
-      <div class="section-title">Agregar ítem</div>
-      <div class="add-item-row">
-        <input
-          id="itemNameInput"
-          type="text"
-          placeholder="Ej: Leche, Pan, Arroz…"
-        />
-      </div>
-      <div class="add-item-row">
-        <select id="itemCategorySelect">
-          <option value="Otros">Otros</option>
-          <option value="Almacén">Almacén</option>
-          <option value="Lácteos">Lácteos</option>
-          <option value="Carnes">Carnes</option>
-          <option value="Frutas y Verduras">Frutas y Verduras</option>
-          <option value="Bebidas">Bebidas</option>
-          <option value="Limpieza">Limpieza</option>
-          <option value="Higiene">Higiene</option>
-        </select>
-        <button class="btn" id="addItemBtn">Agregar</button>
-      </div>
-    </section>
+        <div class="flex-between">
+          <button class="btn" id="loginBtn">Entrar</button>
+          <button class="btn btn-outline" id="clearAllBtn">Borrar todo (app)</button>
+        </div>
 
-    <!-- Ítems -->
-    <section>
-      <div class="flex-between">
-        <div class="section-title">Ítems de la lista</div>
-        <button class="btn btn-outline" id="clearCheckedBtn">
-          Borrar comprados
-        </button>
+        <div>
+          <div class="section-title" style="margin-bottom:4px;">Últimos usuarios</div>
+          <div id="recentUsers" class="login-users">
+            <!-- chips usuarios -->
+          </div>
+        </div>
       </div>
-      <div class="items-container" id="itemsContainer">
-        <!-- Render dinámico -->
-      </div>
-    </section>
 
-    <div class="footer">
-      Datos guardados en este dispositivo · Versión MVP  
+      <div class="footer">
+        Datos guardados localmente · Sin servidor · Versión con multiusuario
+      </div>
+    </div>
+
+    <!-- MAIN APP VIEW -->
+    <div id="mainView" style="display:none; flex-direction:column; gap:16px;">
+      <header class="app-header">
+        <div>
+          <div class="app-title">Listas Vallozzi</div>
+          <div class="badge">Multiusuario · localStorage</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">V</div>
+            <span id="currentUserLabel">Usuario</span>
+          </div>
+          <button class="btn btn-outline" id="logoutBtn">Salir</button>
+        </div>
+      </header>
+
+      <!-- Selector de lista -->
+      <section>
+        <div class="section-title">Lista actual</div>
+        <div class="list-selector">
+          <select id="listSelect"></select>
+          <button class="btn" id="newListBtn">Nueva</button>
+          <button class="btn btn-outline" id="renameListBtn">Renombrar</button>
+        </div>
+      </section>
+
+      <!-- Agregar ítems -->
+      <section class="add-item">
+        <div class="section-title">Agregar ítem</div>
+        <div class="add-item-row">
+          <input
+            id="itemNameInput"
+            type="text"
+            placeholder="Ej: Leche, Pan, Yerba…"
+          />
+        </div>
+        <div class="add-item-row">
+          <select id="itemCategorySelect">
+            <option value="Otros">Otros</option>
+            <option value="Almacén">Almacén</option>
+            <option value="Lácteos">Lácteos</option>
+            <option value="Carnes">Carnes</option>
+            <option value="Frutas y Verduras">Frutas y Verduras</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Limpieza">Limpieza</option>
+            <option value="Higiene">Higiene</option>
+          </select>
+          <button class="btn" id="addItemBtn">Agregar</button>
+        </div>
+      </section>
+
+      <!-- Ítems -->
+      <section>
+        <div class="flex-between">
+          <div class="section-title">Ítems de la lista</div>
+          <button class="btn btn-outline" id="clearCheckedBtn">
+            Borrar comprados
+          </button>
+        </div>
+        <div class="items-container" id="itemsContainer">
+          <!-- Render dinámico -->
+        </div>
+      </section>
+
+      <div class="footer">
+        Todo queda guardado por usuario en este dispositivo · MVP login 🔐
+      </div>
     </div>
   </div>
 
   <script>
-    // --- Estado global ---
-    const STORAGE_KEY = "vallozzi_bring_clone_v1";
+    // --- CLAVES DE STORAGE ---
+    const STORAGE_KEY = "vallozzi_bring_multiuser_v1";
 
-    let state = {
-      lists: {},
-      activeListId: null,
+    // Estructura global:
+    // {
+    //   users: {
+    //     "Vallozzi": { lists:{...}, activeListId: "..." },
+    //     "Cocina": { ... }
+    //   },
+    //   currentUser: "Vallozzi"
+    // }
+
+    let globalState = {
+      users: {},
+      currentUser: null,
     };
 
-    // --- Utilidades de storage ---
-    function loadState() {
+    // --- ELEMENTOS DOM ---
+    const loginView = document.getElementById("loginView");
+    const mainView = document.getElementById("mainView");
+    const loginNameInput = document.getElementById("loginNameInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const recentUsersContainer = document.getElementById("recentUsers");
+
+    const listSelect = document.getElementById("listSelect");
+    const itemsContainer = document.getElementById("itemsContainer");
+    const itemNameInput = document.getElementById("itemNameInput");
+    const itemCategorySelect = document.getElementById("itemCategorySelect");
+    const userAvatar = document.getElementById("userAvatar");
+    const currentUserLabel = document.getElementById("currentUserLabel");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // --- STORAGE HELPERS ---
+    function loadGlobalState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
-          // Estado inicial con una lista por defecto
-          const id = crypto.randomUUID();
-          state = {
-            lists: {
-              [id]: {
-                id,
-                name: "Mi primera lista",
-                items: [],
-              },
-            },
-            activeListId: id,
+          globalState = {
+            users: {},
+            currentUser: null,
           };
-          saveState();
+          saveGlobalState();
           return;
         }
         const parsed = JSON.parse(raw);
-        if (parsed && parsed.lists && Object.keys(parsed.lists).length > 0) {
-          state = parsed;
-        } else {
-          throw new Error("Estado inválido");
+        if (!parsed.users) {
+          parsed.users = {};
         }
+        globalState = parsed;
       } catch (err) {
-        console.error("Error al cargar estado:", err);
-        // Reset básico si algo explota
-        const id = crypto.randomUUID();
-        state = {
-          lists: {
-            [id]: {
-              id,
-              name: "Mi lista",
-              items: [],
-            },
-          },
-          activeListId: id,
+        console.error("Error al cargar estado global:", err);
+        globalState = {
+          users: {},
+          currentUser: null,
         };
-        saveState();
+        saveGlobalState();
       }
     }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function saveGlobalState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(globalState));
     }
 
-    // --- Helpers de listas ---
+    function createDefaultUserState() {
+      const id = crypto.randomUUID();
+      return {
+        lists: {
+          [id]: {
+            id,
+            name: "Mi primera lista",
+            items: [],
+          },
+        },
+        activeListId: id,
+      };
+    }
+
+    function getCurrentUserState() {
+      const uname = globalState.currentUser;
+      if (!uname) return null;
+      if (!globalState.users[uname]) {
+        globalState.users[uname] = createDefaultUserState();
+      }
+      return globalState.users[uname];
+    }
+
+    // --- LOGIN LOGIC ---
+    function normalizeUserName(name) {
+      return name.trim();
+    }
+
+    function login(usernameRaw) {
+      const username = normalizeUserName(usernameRaw);
+      if (!username) return;
+      if (!globalState.users[username]) {
+        // Crear usuario nuevo con estado por defecto
+        globalState.users[username] = createDefaultUserState();
+      }
+      globalState.currentUser = username;
+      saveGlobalState();
+      showMainView();
+      renderAll();
+    }
+
+    function logout() {
+      globalState.currentUser = null;
+      saveGlobalState();
+      showLoginView();
+      renderRecentUsers();
+    }
+
+    function showMainView() {
+      loginView.style.display = "none";
+      mainView.style.display = "flex";
+
+      const uname = globalState.currentUser || "Usuario";
+      currentUserLabel.textContent = uname;
+      userAvatar.textContent = uname.charAt(0).toUpperCase();
+    }
+
+    function showLoginView() {
+      mainView.style.display = "none";
+      loginView.style.display = "flex";
+      loginNameInput.value = "";
+      loginNameInput.focus();
+    }
+
+    function renderRecentUsers() {
+      const users = Object.keys(globalState.users);
+      recentUsersContainer.innerHTML = "";
+      if (users.length === 0) {
+        recentUsersContainer.innerHTML =
+          '<span class="login-hint">Todavía no hay usuarios. Empezá creando uno 👆</span>';
+        return;
+      }
+      users.slice(0, 10).forEach((uname) => {
+        const chip = document.createElement("button");
+        chip.className = "user-chip";
+        chip.textContent = uname;
+        chip.addEventListener("click", () => login(uname));
+        recentUsersContainer.appendChild(chip);
+      });
+    }
+
+    // --- LISTAS & ITEMS (por usuario) ---
     function getActiveList() {
-      return state.lists[state.activeListId] || null;
+      const userState = getCurrentUserState();
+      if (!userState) return null;
+      return userState.lists[userState.activeListId] || null;
     }
 
     function createList(name) {
+      const userState = getCurrentUserState();
+      if (!userState) return;
       const id = crypto.randomUUID();
-      state.lists[id] = {
+      userState.lists[id] = {
         id,
         name: name || "Lista sin nombre",
         items: [],
       };
-      state.activeListId = id;
-      saveState();
+      userState.activeListId = id;
+      saveGlobalState();
       renderAll();
     }
 
     function renameList(newName) {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
       list.name = newName || list.name;
-      saveState();
+      saveGlobalState();
       renderAll();
     }
 
-    function deleteList(listId) {
-      delete state.lists[listId];
-      const ids = Object.keys(state.lists);
-      state.activeListId = ids[0] || null;
-      saveState();
-      renderAll();
-    }
-
-    // --- Helpers de ítems ---
     function addItemToActiveList(name, category) {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
+
       const trimmedName = name.trim();
       if (!trimmedName) return;
+
       const item = {
         id: crypto.randomUUID(),
         name: trimmedName,
@@ -427,61 +666,89 @@
         createdAt: Date.now(),
       };
       list.items.push(item);
-      saveState();
+      saveGlobalState();
       renderItems();
     }
 
     function toggleItemChecked(itemId) {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
+
       const item = list.items.find((i) => i.id === itemId);
       if (!item) return;
+
       item.checked = !item.checked;
-      saveState();
+      saveGlobalState();
       renderItems();
     }
 
     function deleteItem(itemId) {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
+
       list.items = list.items.filter((i) => i.id !== itemId);
-      saveState();
+      saveGlobalState();
       renderItems();
     }
 
     function clearCheckedItems() {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
+
       list.items = list.items.filter((i) => !i.checked);
-      saveState();
+      saveGlobalState();
       renderItems();
     }
 
-    // --- Render ---
-    const listSelect = document.getElementById("listSelect");
-    const itemsContainer = document.getElementById("itemsContainer");
-    const itemNameInput = document.getElementById("itemNameInput");
-    const itemCategorySelect = document.getElementById("itemCategorySelect");
-
+    // --- RENDER ---
     function renderListSelector() {
-      const ids = Object.keys(state.lists);
-      if (ids.length === 0) return;
+      const userState = getCurrentUserState();
+      if (!userState) {
+        listSelect.innerHTML = "";
+        return;
+      }
 
+      const ids = Object.keys(userState.lists);
       listSelect.innerHTML = "";
-      ids.forEach((id) => {
-        const list = state.lists[id];
+
+      if (ids.length === 0) {
+        const id = crypto.randomUUID();
+        userState.lists[id] = {
+          id,
+          name: "Mi lista",
+          items: [],
+        };
+        userState.activeListId = id;
+        saveGlobalState();
+      }
+
+      Object.keys(userState.lists).forEach((id) => {
+        const list = userState.lists[id];
         const opt = document.createElement("option");
         opt.value = id;
         opt.textContent = list.name;
-        if (id === state.activeListId) opt.selected = true;
+        if (id === userState.activeListId) opt.selected = true;
         listSelect.appendChild(opt);
       });
     }
 
     function renderItems() {
+      const userState = getCurrentUserState();
       itemsContainer.innerHTML = "";
 
-      const list = getActiveList();
+      if (!userState) {
+        itemsContainer.innerHTML =
+          '<div class="empty-state">Logueate para ver tus listas 👆</div>';
+        return;
+      }
+
+      const list = userState.lists[userState.activeListId];
       if (!list) {
         itemsContainer.innerHTML =
           '<div class="empty-state">No hay listas activas. Creá una nueva arriba 👆</div>';
@@ -494,7 +761,6 @@
         return;
       }
 
-      // Agrupar por categoría
       const groups = {};
       list.items.forEach((item) => {
         const cat = item.category || "Otros";
@@ -502,7 +768,6 @@
         groups[cat].push(item);
       });
 
-      // Ordenar categorías por nombre
       const sortedCats = Object.keys(groups).sort((a, b) =>
         a.localeCompare(b, "es")
       );
@@ -528,7 +793,6 @@
         header.appendChild(count);
         group.appendChild(header);
 
-        // Ordenar ítems: primero no tildados, después tildados
         const sortedItems = groups[cat].slice().sort((a, b) => {
           if (a.checked === b.checked) {
             return a.createdAt - b.createdAt;
@@ -545,9 +809,7 @@
 
           const checkbox = document.createElement("div");
           checkbox.className = "checkbox" + (item.checked ? " checked" : "");
-          checkbox.addEventListener("click", () =>
-            toggleItemChecked(item.id)
-          );
+          checkbox.addEventListener("click", () => toggleItemChecked(item.id));
 
           const inner = document.createElement("div");
           inner.className = "checkbox-inner";
@@ -598,7 +860,42 @@
       renderItems();
     }
 
-    // --- Eventos ---
+    // --- EVENTOS ---
+    loginBtn.addEventListener("click", () => {
+      const name = loginNameInput.value;
+      if (!name.trim()) {
+        loginNameInput.focus();
+        return;
+      }
+      login(name);
+    });
+
+    loginNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        loginBtn.click();
+      }
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+      if (
+        confirm(
+          "¿Seguro que querés borrar TODOS los datos de la app (usuarios y listas)?"
+        )
+      ) {
+        localStorage.removeItem(STORAGE_KEY);
+        globalState = {
+          users: {},
+          currentUser: null,
+        };
+        showLoginView();
+        renderRecentUsers();
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      logout();
+    });
+
     document.getElementById("newListBtn").addEventListener("click", () => {
       const name = prompt("Nombre de la nueva lista:", "Súper");
       if (!name) return;
@@ -606,17 +903,22 @@
     });
 
     document.getElementById("renameListBtn").addEventListener("click", () => {
-      const list = getActiveList();
+      const userState = getCurrentUserState();
+      if (!userState) return;
+      const list = userState.lists[userState.activeListId];
       if (!list) return;
+
       const name = prompt("Nuevo nombre para la lista:", list.name);
       if (!name) return;
       renameList(name.trim());
     });
 
     listSelect.addEventListener("change", (e) => {
+      const userState = getCurrentUserState();
+      if (!userState) return;
       const id = e.target.value;
-      state.activeListId = id;
-      saveState();
+      userState.activeListId = id;
+      saveGlobalState();
       renderItems();
     });
 
@@ -650,9 +952,18 @@
         }
       });
 
-    // --- Init ---
-    loadState();
-    renderAll();
+    // --- INIT ---
+    loadGlobalState();
+    renderRecentUsers();
+
+    // Autologin si hay usuario activo
+    if (globalState.currentUser) {
+      showMainView();
+      renderAll();
+    } else {
+      showLoginView();
+    }
   </script>
 </body>
 </html>
+
