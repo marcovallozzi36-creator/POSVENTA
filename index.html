@@ -341,7 +341,7 @@
       gap: 8px;
       padding: 7px 9px;
       border-radius: 12px;
-      background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
+      background: radial-gradient(circle at top.left, #0b1120 0, #020617 45%, #020617 100%);
       border: 1px solid rgba(31, 41, 55, 0.95);
       font-size: 0.8rem;
     }
@@ -547,7 +547,7 @@
       box-shadow: 0 12px 30px rgba(22, 163, 74, 0.8);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.15s.ease, transform 0.15s.ease;
+      transition: opacity 0.15s ease, transform 0.15s ease;
       z-index: 9999;
     }
 
@@ -572,7 +572,7 @@
       border-radius: 10px;
       border: 1px solid rgba(31, 41, 55, 0.9);
       font-size: 0.78rem;
-      background: radial-gradient(circle at top left, #0b1120 0, #020617 45%, #020617 100%);
+      background: radial-gradient(circle at top.left, #0b1120 0, #020617 45%, #020617 100%);
     }
 
     .product-main {
@@ -626,17 +626,22 @@
         <small id="camera-status-text">Cámara lista</small>
       </div>
 
-      <button class="btn btn-primary" id="btn-start-scan">
-        📷 Escanear código
-      </button>
-      <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="margin-top:6px; display:none;">
-        ⏹️ Detener escáner
-      </button>
+      <div class="field-row">
+        <button class="btn btn-primary" id="btn-start-scan">
+          📷 Escanear código
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btn-stop-scan" style="display:none;">
+          ⏹️ Detener
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btn-switch-camera" style="display:none;">
+          🔁 Cambiar cámara
+        </button>
+      </div>
 
       <div class="scanner-container" id="scanner-container">
         <div class="scanner-header">
           <span><span class="dot-live"></span> Escaneando…</span>
-          <span id="camera-name">Cámara trasera</span>
+          <span id="camera-name">Cámara</span>
         </div>
         <div class="scanner-video-wrapper">
           <video id="video" playsinline></video>
@@ -693,7 +698,7 @@
         <input
           type="text"
           id="store-name"
-          placeholder="Nombre del súper / negocio (ej: Disco, Chino de la esquina)"
+          placeholder="Nombre del súper / negocio"
           autocomplete="off"
         />
         <button class="btn btn-secondary btn-sm" id="btn-close-purchase">
@@ -769,20 +774,22 @@
   const LIST_KEY      = "ls_super_current_list_v2";
   const PURCHASES_KEY = "ls_super_purchases_v1";
 
-  let products      = []; // {id, code, name}
-  let priceHistory  = []; // {id, productId, price, date}
-  let currentList   = []; // {productId, qty, price}
+  let products      = [];
+  let priceHistory  = [];
+  let currentList   = [];
   let currentStore  = "";
-  let purchases     = []; // {id, storeName, date, total, items: [...]}
+  let purchases     = [];
 
-  // Scanner
+  // Scanner / cámaras
   let codeReader = null;
-  let currentDeviceId = null;
   let scanning = false;
+  let videoDevices = [];
+  let currentDeviceIndex = 0;
 
   // DOM
   const btnStartScan       = document.getElementById("btn-start-scan");
   const btnStopScan        = document.getElementById("btn-stop-scan");
+  const btnSwitchCamera    = document.getElementById("btn-switch-camera");
   const scannerContainer   = document.getElementById("scanner-container");
   const videoElement       = document.getElementById("video");
   const lastCodeEl         = document.getElementById("last-code");
@@ -808,7 +815,6 @@
 
   const toastEl            = document.getElementById("toast");
 
-  // Productos
   const productCodeInput   = document.getElementById("product-code-input");
   const productNameInput   = document.getElementById("product-name-input");
   const btnSaveProduct     = document.getElementById("btn-save-product");
@@ -1000,7 +1006,7 @@
   }
 
   // ---------------------------
-  // Render Productos
+  // Productos
   // ---------------------------
   function renderProducts() {
     productsListEl.innerHTML = "";
@@ -1066,7 +1072,6 @@
 
     let prod = findProductByCode(code);
     if (prod) {
-      // Actualizar nombre
       prod.name = name || prod.name || "Producto sin nombre";
       showToast("✏️ Producto actualizado");
     } else {
@@ -1107,7 +1112,7 @@
   }
 
   // ---------------------------
-  // Render lista actual
+  // Lista actual
   // ---------------------------
   function renderList() {
     itemsListEl.innerHTML = "";
@@ -1172,13 +1177,13 @@
       actions.className = "item-actions";
 
       const btnEdit = document.createElement("button");
-      btnEdit.className = "btn.btn-secondary.btn-sm".replace(/\./g," ");
+      btnEdit.className = "btn btn-secondary btn-sm";
       btnEdit.textContent = "✏️";
       btnEdit.title = "Editar cantidad / precio";
       btnEdit.dataset.action = "edit";
 
       const btnDelete = document.createElement("button");
-      btnDelete.className = "btn.btn-danger.btn-sm".replace(/\./g," ");
+      btnDelete.className = "btn btn-danger btn-sm";
       btnDelete.textContent = "🗑️";
       btnDelete.title = "Quitar de la lista";
       btnDelete.dataset.action = "delete";
@@ -1197,7 +1202,7 @@
   }
 
   // ---------------------------
-  // Render reporte de precios
+  // Reporte de precios
   // ---------------------------
   function renderReport() {
     reportListEl.innerHTML = "";
@@ -1287,7 +1292,7 @@
   }
 
   // ---------------------------
-  // Gráfico de evolución de precio
+  // Gráfico precios
   // ---------------------------
   function drawPriceChart(productId) {
     const ctx = priceChartCanvas.getContext("2d");
@@ -1371,7 +1376,7 @@
   }
 
   // ---------------------------
-  // Render historial de compras
+  // Historial compras
   // ---------------------------
   function renderPurchases() {
     purchasesListEl.innerHTML = "";
@@ -1420,7 +1425,7 @@
   }
 
   // ---------------------------
-  // Escaneo
+  // Escáner / cámaras
   // ---------------------------
   async function initCodeReaderIfNeeded() {
     if (codeReader) return;
@@ -1429,6 +1434,31 @@
       return;
     }
     codeReader = new ZXing.BrowserMultiFormatReader();
+  }
+
+  async function loadVideoDevices() {
+    if (!codeReader) await initCodeReaderIfNeeded();
+    if (!codeReader) return;
+    videoDevices = await codeReader.listVideoInputDevices();
+    if (!videoDevices || !videoDevices.length) {
+      alert("No se encontraron cámaras en este dispositivo.");
+      cameraStatusText.textContent = "Sin cámara";
+      return;
+    }
+
+    // Elegir cámara trasera si se puede
+    let backIndex = videoDevices.findIndex(d =>
+      (d.label || "").toLowerCase().includes("back") ||
+      (d.label || "").toLowerCase().includes("environment")
+    );
+    currentDeviceIndex = backIndex >= 0 ? backIndex : 0;
+  }
+
+  function updateCameraLabel() {
+    if (!videoDevices.length) return;
+    const dev = videoDevices[currentDeviceIndex];
+    const label = dev.label || `Cámara ${currentDeviceIndex + 1}`;
+    cameraNameEl.textContent = label.length > 30 ? label.slice(0, 30) + "…" : label;
   }
 
   async function startScanner() {
@@ -1443,24 +1473,12 @@
 
       cameraStatusText.textContent = "Buscando cámara…";
 
-      const devices = await codeReader.listVideoInputDevices();
-      if (!devices || !devices.length) {
-        alert("No se encontraron cámaras en este dispositivo.");
-        cameraStatusText.textContent = "Sin cámara";
-        return;
+      if (!videoDevices.length) {
+        await loadVideoDevices();
       }
+      if (!videoDevices.length) return;
 
-      let deviceIdToUse = devices[0].deviceId;
-      const backCam = devices.find(d =>
-        (d.label || "").toLowerCase().includes("back")
-      );
-      if (backCam) deviceIdToUse = backCam.deviceId;
-      currentDeviceId = deviceIdToUse;
-
-      const deviceLabel =
-        (devices.find(d => d.deviceId === deviceIdToUse)?.label || "Cámara");
-      cameraNameEl.textContent =
-        deviceLabel.length > 30 ? deviceLabel.slice(0, 30) + "…" : deviceLabel;
+      btnSwitchCamera.style.display = videoDevices.length > 1 ? "inline-flex" : "none";
 
       scannerContainer.style.display = "flex";
       btnStartScan.disabled = true;
@@ -1469,11 +1487,12 @@
       scanning = true;
 
       lastCodeEl.textContent = "–";
+      updateCameraLabel();
 
       await codeReader.decodeFromVideoDevice(
-        deviceIdToUse,
+        videoDevices[currentDeviceIndex].deviceId,
         videoElement,
-        (result, err) => {
+        (result) => {
           if (!scanning) return;
           if (result) {
             const value = result.text;
@@ -1512,6 +1531,42 @@
     cameraStatusText.textContent = "Cámara lista";
   }
 
+  async function switchCamera() {
+    if (!videoDevices.length) {
+      await loadVideoDevices();
+    }
+    if (videoDevices.length < 2) {
+      alert("No hay más de una cámara disponible.");
+      return;
+    }
+
+    currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+    if (!codeReader) return;
+
+    scanning = true;
+    updateCameraLabel();
+
+    try {
+      await codeReader.decodeFromVideoDevice(
+        videoDevices[currentDeviceIndex].deviceId,
+        videoElement,
+        (result) => {
+          if (!scanning) return;
+          if (result) {
+            const value = result.text;
+            lastCodeEl.textContent = value;
+            handleScannedCode(value);
+          }
+        }
+      );
+    } catch (e) {
+      console.error("Error cambiando cámara", e);
+    }
+  }
+
+  // ---------------------------
+  // Lógica escaneo (alta sola la primera vez)
+  // ---------------------------
   function handleScannedCode(code) {
     if (!code) return;
 
@@ -1521,10 +1576,10 @@
       const add = confirm(
         "Este código no está en la base de productos.\n\nCódigo: " +
           code +
-          "\n\n¿Querés darlo de alta ahora?"
+          "\n\n¿Querés darlo de alta ahora? (Solo alta, no se registrará compra)"
       );
       if (!add) {
-        alert("Primero tenés que darlo de alta en el módulo 'Productos'.");
+        alert("Si querés usar este producto en compras, primero tenés que darlo de alta.");
         return;
       }
 
@@ -1543,8 +1598,12 @@
       saveState();
       renderProducts();
       renderReport();
+      showToast("📦 Producto dado de alta");
+      // IMPORTANTE: acá cortamos, NO pedimos precio, NO lo agregamos a la lista
+      return;
     }
 
+    // Si ya existe, ahora sí comportamiento de compra
     const { last } = getLastPrices(prod.id);
     const lastPriceVal = last ? last.price : null;
 
@@ -1574,6 +1633,7 @@
   // ---------------------------
   btnStartScan.addEventListener("click", startScanner);
   btnStopScan.addEventListener("click", stopScanner);
+  btnSwitchCamera.addEventListener("click", switchCamera);
   btnClearList.addEventListener("click", clearCurrentList);
   btnClosePurchase.addEventListener("click", closeCurrentPurchase);
 
@@ -1582,7 +1642,6 @@
     saveState();
   });
 
-  // Productos: alta / edición / baja
   btnSaveProduct.addEventListener("click", handleSaveProduct);
 
   productsListEl.addEventListener("click", (e) => {
@@ -1633,7 +1692,6 @@
     }
   });
 
-  // Lista actual editar / borrar ítem
   itemsListEl.addEventListener("click", (e) => {
     const target = e.target;
     const li = target.closest(".item");
